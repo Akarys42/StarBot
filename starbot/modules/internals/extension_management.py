@@ -94,24 +94,32 @@ class ExtensionManagement(Cog):
 
         await inter.send(f":white_check_mark: extension `{ext}` reloaded.")
 
-    def _autocomplete_ext(self, query: str) -> list[str]:
-        """Return a list of extensions that contains the query."""
-        return [ext for ext in self.bot.all_extensions if query in ext]
-
     @load.autocomplete("ext")
     def load_autocomplete(self, _inter: ACI, query: str) -> list[str]:
         """Autocomplete for the load command."""
-        return self._autocomplete_ext(query)
+        return [
+            ext
+            for ext, status in self._list_extension_status()
+            if query in ext and not status
+        ]
 
     @unload.autocomplete("ext")
     def unload_autocomplete(self, _inter: ACI, query: str) -> list[str]:
         """Autocomplete for the unload command."""
-        return self._autocomplete_ext(query)
+        return [
+            ext
+            for ext, status in self._list_extension_status()
+            if query in ext and status
+        ]
 
     @reload.autocomplete("ext")
     def reload_autocomplete(self, _inter: ACI, query: str) -> list[str]:
         """Autocomplete for the reload command."""
-        return self._autocomplete_ext(query)
+        return [
+            ext
+            for ext, status in self._list_extension_status()
+            if query in ext and status
+        ]
 
 
 def setup(bot: StarBot) -> None:
