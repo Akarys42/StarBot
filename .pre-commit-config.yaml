@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.5.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.5.1
+    hooks:
+      - id: python-check-blanket-noqa
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+
+  - repo: local
+    hooks:
+      - id: black
+        name: Black
+        description: Formats the python source code using black.
+        language: system
+        entry: poetry run task format
+        require_serial: true
+        pass_filenames: false
+
+      - id: flake8
+        name: Flake8
+        description: Lints this repository using flake8.
+        language: system
+        entry: poetry run python -m flake8
+        require_serial: true
+        pass_filenames: false
