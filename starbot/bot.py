@@ -16,6 +16,7 @@ class StarBot(Bot):
 
     def __init__(self, *args, **kwargs) -> None:
         self.start_time = arrow.utcnow()
+        self.all_extensions: list[str] = []
         super().__init__(*args, **kwargs)
 
     def find_extensions(self, module: str = "starbot.modules") -> None:
@@ -40,6 +41,7 @@ class StarBot(Bot):
                         if isinstance(f, ast.FunctionDef)
                     ):
                         logger.info(f"Loading extension {module_name}")
+                        self.all_extensions.append(module_name)
                         self.load_extension(module_name)
                 except SyntaxError as e:
                     logger.warning(f"{module_name} contains a syntax error:\n{e}")
