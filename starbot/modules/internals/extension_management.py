@@ -20,7 +20,7 @@ class ExtensionManagement(Cog):
         super().__init__()
 
     async def cog_slash_command_check(self, inter: ACI) -> bool:
-        """Check that the user is one of the owner."""
+        """Check that the user is one of the owners."""
         return await self.bot.is_owner(inter.author)
 
     def _list_extension_status(self) -> list[tuple[str, bool]]:
