@@ -7,7 +7,7 @@ from disnake import AllowedMentions, Game, Intents
 from disnake.ext.commands import Bot, Context, when_mentioned_or
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import selectinload, sessionmaker
 
 from starbot.configuration.config import GuildConfig
 from starbot.constants import ACI, DATABASE_URL, DEFAULT_PREFIX, TEST_GUILDS
@@ -33,12 +33,32 @@ class StarBot(Bot):
 
         self.add_app_command_check(self._is_guild_configured_check, slash_commands=True)
 
-    def get_cfg(self, ctx_or_inter: Context | ACI) -> GuildConfig:
+    async def get_config(self, ctx_or_inter: Context | ACI) -> GuildConfig:
         """Retrieve the guild's configuration."""
-        ...
+        async with self.Session() as session:
+            guild = (
+                await session.execute(
+                    select(GuildModel)
+                    .options(selectinload(GuildModel.config_entries))
+                    .where(GuildModel.discord_id == ctx_or_inter.guild.id)
+                )
+            ).first()
 
-    async def _is_guild_configured_check(self, ctx_or_inter: Context | ACI) -> None:
+        if guild is None:
+            raise GuildNotConfiguredError()
+
+        mapped = {entry.key: entry.value for entry in guild[0].config_entries}
+        return GuildConfig(ctx_or_inter.guild.id, mapped)
+
+    async def _is_guild_configured_check(self, ctx_or_inter: Context | ACI) -> bool:
         """Return whether or not the guild is configured."""
+        # First check if we are bypassing the check using the
+        # `starbot.decorators.bypass_guild_configured_check` decorator
+        if isinstance(ctx_or_inter, ACI) and getattr(
+            ctx_or_inter.application_command, "__starbot_bypass_config_check__", False
+        ):
+            return True
+
         async with self.Session() as session:
             if (
                 await session.execute(
@@ -48,6 +68,7 @@ class StarBot(Bot):
                 )
             ).first() is None:
                 raise GuildNotConfiguredError()
+        return True
 
     def find_extensions(self, module: str = "starbot.modules") -> None:
         """Find and load all extensions."""

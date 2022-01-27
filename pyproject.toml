@@ -17,6 +17,7 @@ arrow = "^1.2.1"
 SQLAlchemy = {extras = ["asyncio"], version = "^1.4.31"}
 alembic = "^1.7.5"
 asyncpg = "^0.25.0"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"

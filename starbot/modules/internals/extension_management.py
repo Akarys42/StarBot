@@ -4,6 +4,7 @@ from disnake.ext.commands import Cog, slash_command
 
 from starbot.bot import StarBot
 from starbot.constants import ACI
+from starbot.decorators import bypass_guild_configured_check
 
 RED_CIRCLE = "\N{LARGE RED CIRCLE}"
 GREEN_CIRCLE = "\N{LARGE GREEN CIRCLE}"
@@ -37,6 +38,7 @@ class ExtensionManagement(Cog):
         """Manage loaded extensions."""
         pass
 
+    @bypass_guild_configured_check
     @exts.sub_command(name="list")
     async def list_(self, inter: ACI) -> None:
         """List all the extensions and their status."""
@@ -46,6 +48,7 @@ class ExtensionManagement(Cog):
         ]
         await inter.send("\n".join(lines))
 
+    @bypass_guild_configured_check
     @exts.sub_command()
     async def load(self, inter: ACI, ext: str) -> None:
         """Load an extension."""
@@ -62,6 +65,7 @@ class ExtensionManagement(Cog):
 
         await inter.send(f":white_check_mark: extension `{ext}` loaded.")
 
+    @bypass_guild_configured_check
     @exts.sub_command()
     async def unload(self, inter: ACI, ext: str) -> None:
         """Unload an extension."""
@@ -78,6 +82,7 @@ class ExtensionManagement(Cog):
 
         await inter.send(f":white_check_mark: extension `{ext}` unloaded.")
 
+    @bypass_guild_configured_check
     @exts.sub_command()
     async def reload(self, inter: ACI, ext: str) -> None:
         """Reload an extension."""

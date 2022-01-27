@@ -47,7 +47,8 @@ class ErrorHandler(Cog):
                 )
             case errors.CommandInvokeError():
                 logger.error(
-                    f"Error while invoking command {ctx.command.name} by {ctx.author}: {error}"
+                    f"Error while invoking command {ctx.command.name} by {ctx.author}: {error}",
+                    exc_info=error.original,
                 )
                 await error_embed(
                     ctx,
@@ -93,7 +94,8 @@ class ErrorHandler(Cog):
                 )
             case errors.CommandInvokeError():
                 logger.error(
-                    f"Error while invoking command {inter.data.name} by {inter.author}: {error}"
+                    f"Error while invoking command {inter.data.name} by {inter.author}: {error}",
+                    exc_info=error.original,
                 )
                 await error_embed(
                     inter,

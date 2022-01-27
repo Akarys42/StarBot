@@ -15,7 +15,9 @@ class Info(Cog):
     @slash_command()
     async def info(self, inter: ACI) -> None:
         """Get general information about the bot."""
-        embed = Embed(title="Status")
+        config = await self.bot.get_config(inter)
+
+        embed = Embed(title="Status", color=int(config.color.info))
 
         embed.add_field(name="Latency", value=f"{self.bot.latency * 1000:.2f}ms")
         embed.add_field(
