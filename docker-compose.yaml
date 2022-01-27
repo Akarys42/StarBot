@@ -1,11 +1,29 @@
 version: "3.8"
 services:
+  postgres:
+    image: postgres:9.6
+    environment:
+      - POSTGRES_USER=starbot
+      - POSTGRES_PASSWORD=starbot
+      - POSTGRES_DB=starbot
+    ports:
+      - "5432:5432"
+    volumes:
+      - starbot_data:/var/lib/postgresql/data
+    restart: always
+
   bot:
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - .:/bot:ro
+      - .:/bot:rw
     tty: true
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://starbot:starbot@postgres:5432/starbot
+      - RUN_MIGRATIONS=1
+
+volumes:
+  starbot_data:

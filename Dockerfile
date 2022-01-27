@@ -4,8 +4,8 @@ FROM --platform=linux/amd64 python:3.10-slim
 ENV PIP_NO_CACHE_DIR=false \
     POETRY_VIRTUALENVS_CREATE=false
 
-ENTRYPOINT ["python3"]
-CMD ["-m", "starbot"]
+ENTRYPOINT ["bash", "-c"]
+CMD ["./entrypoint.sh"]
 
 WORKDIR /bot
 

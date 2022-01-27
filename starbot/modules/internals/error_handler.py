@@ -5,6 +5,7 @@ from disnake.ext.commands import Cog, CommandError, Context, errors
 
 from starbot.bot import StarBot
 from starbot.constants import ACI
+from starbot.exceptions import GuildNotConfiguredError
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,17 @@ class ErrorHandler(Cog):
     async def on_command_error(self, ctx: Context, error: CommandError) -> None:
         """Handle errors in commands."""
         match error:
+            # Starbot errors
+            case GuildNotConfiguredError():
+                if not ctx.guild.owner_id == ctx.author.id:
+                    await ctx.send(
+                        ":x: This guild is not configured yet. Please contact the server owner."
+                    )
+                else:
+                    await ctx.send(
+                        ":x: This guild is not configured yet. Please run `/configure`."
+                    )
+            # Disnake errors
             case errors.CommandNotFound():
                 logger.debug(f"Command not found: {ctx.command.name}")
             case errors.CommandOnCooldown():
@@ -60,6 +72,19 @@ class ErrorHandler(Cog):
     async def on_slash_command_error(self, inter: ACI, error: CommandError) -> None:
         """Handle errors in slash commands."""
         match error:
+            # Starbot errors
+            case GuildNotConfiguredError():
+                if not inter.guild.owner_id == inter.author.id:
+                    await inter.send(
+                        ":x: This guild is not configured yet. Please contact the server owner.",
+                        ephemeral=True,
+                    )
+                else:
+                    await inter.send(
+                        ":x: This guild is not configured yet. Please run `/configure`.",
+                        ephemeral=True,
+                    )
+            # Disnake errors
             case errors.CommandOnCooldown():
                 await error_embed(inter, "This command is on cooldown.")
             case errors.CheckFailure():

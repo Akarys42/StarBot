@@ -1,0 +1,17 @@
+color:
+  danger:
+    type: int
+    default: 0xED4245
+    description: Color for the danger level
+  warning:
+    type: int
+    default: 0xFEE75C
+    description: Color for the warning level
+  info:
+    type: int
+    default: 0x5865F2
+    description: Color for the info level
+  success:
+    type: int
+    default: 0x57F287
+    description: Color for the success level

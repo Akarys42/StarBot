@@ -4,9 +4,15 @@ from pathlib import Path
 
 import arrow
 from disnake import AllowedMentions, Game, Intents
-from disnake.ext.commands import Bot, when_mentioned_or
+from disnake.ext.commands import Bot, Context, when_mentioned_or
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
-from starbot.constants import DEFAULT_PREFIX, TEST_GUILDS
+from starbot.configuration.config import GuildConfig
+from starbot.constants import ACI, DATABASE_URL, DEFAULT_PREFIX, TEST_GUILDS
+from starbot.exceptions import GuildNotConfiguredError
+from starbot.models.guild import GuildModel
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +21,33 @@ class StarBot(Bot):
     """Our main bot class."""
 
     def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
         self.start_time = arrow.utcnow()
         self.all_extensions: list[str] = []
-        super().__init__(*args, **kwargs)
+
+        self.engine = create_async_engine(DATABASE_URL)
+        self.Session = sessionmaker(
+            self.engine, expire_on_commit=False, class_=AsyncSession
+        )
+
+        self.add_app_command_check(self._is_guild_configured_check, slash_commands=True)
+
+    def get_cfg(self, ctx_or_inter: Context | ACI) -> GuildConfig:
+        """Retrieve the guild's configuration."""
+        ...
+
+    async def _is_guild_configured_check(self, ctx_or_inter: Context | ACI) -> None:
+        """Return whether or not the guild is configured."""
+        async with self.Session() as session:
+            if (
+                await session.execute(
+                    select(GuildModel).where(
+                        GuildModel.discord_id == ctx_or_inter.guild.id
+                    )
+                )
+            ).first() is None:
+                raise GuildNotConfiguredError()
 
     def find_extensions(self, module: str = "starbot.modules") -> None:
         """Find and load all extensions."""
