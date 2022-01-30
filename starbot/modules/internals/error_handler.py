@@ -23,45 +23,6 @@ class ErrorHandler(Cog):
         self.bot = bot
 
     @Cog.listener()
-    async def on_command_error(self, ctx: Context, error: CommandError) -> None:
-        """Handle errors in commands."""
-        match error:
-            # Starbot errors
-            case GuildNotConfiguredError():
-                if not ctx.guild.owner_id == ctx.author.id:
-                    await ctx.send(
-                        ":x: This guild is not configured yet. Please contact the server owner."
-                    )
-                else:
-                    await ctx.send(":x: This guild is not configured yet. Please run `/configure`.")
-            # Disnake errors
-            case errors.CommandNotFound():
-                logger.debug(f"Command not found: {ctx.command.name}")
-            case errors.CommandOnCooldown():
-                await error_embed(ctx, "This command is on cooldown.")
-            case errors.CheckFailure():
-                await error_embed(ctx, "You do not have permission to use this command.")
-            case errors.CommandInvokeError():
-                logger.error(
-                    f"Error while invoking command {ctx.command.name} by {ctx.author}: {error}",
-                    exc_info=error.original,
-                )
-                await error_embed(
-                    ctx,
-                    "An error occurred while executing this command. Please let us know.",
-                )
-            case errors.MissingRequiredArgument():
-                await error_embed(ctx, f"You are missing a required argument: {error}")
-            case errors.BadArgument():
-                await error_embed(ctx, f"You have provided an invalid argument: {error}")
-            case errors.BadUnionArgument():
-                await error_embed(ctx, f"You have provided an invalid argument: {error}")
-            case errors.TooManyArguments():
-                await error_embed(ctx, f"You have provided too many arguments: {error}")
-            case errors.UserInputError():
-                await error_embed(ctx, f"Your input seems off: {error}")
-
-    @Cog.listener()
     async def on_slash_command_error(self, inter: ACI, error: CommandError) -> None:
         """Handle errors in slash commands."""
         match error:

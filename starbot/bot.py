@@ -4,13 +4,13 @@ from pathlib import Path
 
 import arrow
 from disnake import AllowedMentions, Game, Intents
-from disnake.ext.commands import Bot, Context, when_mentioned_or
+from disnake.ext.commands import Bot, Context
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import selectinload, sessionmaker
 
 from starbot.configuration.config import GuildConfig
-from starbot.constants import ACI, DATABASE_URL, DEFAULT_PREFIX, TEST_GUILDS
+from starbot.constants import ACI, DATABASE_URL, TEST_GUILDS
 from starbot.exceptions import GuildNotConfiguredError
 from starbot.models.guild import GuildModel
 
@@ -102,9 +102,9 @@ class StarBot(Bot):
 
         return cls(
             intents=intents,
-            command_prefix=when_mentioned_or(DEFAULT_PREFIX),
+            command_prefix=None,
+            help_command=None,
             activity=Game(name="with slash commands!"),
-            case_insensitive=True,
             allowed_mentions=AllowedMentions(everyone=False, roles=False),
             test_guilds=TEST_GUILDS,
         )
