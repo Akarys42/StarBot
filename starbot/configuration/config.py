@@ -24,9 +24,7 @@ class GuildConfig:
     Each node can be accessed using the dot notation.
     """
 
-    def __init__(
-        self, guild_id: int, entries: dict[str, str], prefix: str = ""
-    ) -> None:
+    def __init__(self, guild_id: int, entries: dict[str, str], prefix: str = "") -> None:
         self.guild_id = guild_id
         self.entries = entries
         self.prefix = prefix
@@ -39,9 +37,7 @@ class GuildConfig:
 
         # If this has a `type` attribute then we know it is an entry
         if "type" in definition:
-            value = (
-                self.entries[path] if path in self.entries else definition["default"]
-            )
+            value = self.entries[path] if path in self.entries else definition["default"]
 
             return self._convert_entry(value, definition)
         # If not, we can just nest another config

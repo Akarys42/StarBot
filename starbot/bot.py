@@ -27,9 +27,7 @@ class StarBot(Bot):
         self.all_extensions: list[str] = []
 
         self.engine = create_async_engine(DATABASE_URL)
-        self.Session = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
+        self.Session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
 
         self.add_app_command_check(self._is_guild_configured_check, slash_commands=True)
 
@@ -62,9 +60,7 @@ class StarBot(Bot):
         async with self.Session() as session:
             if (
                 await session.execute(
-                    select(GuildModel).where(
-                        GuildModel.discord_id == ctx_or_inter.guild.id
-                    )
+                    select(GuildModel).where(GuildModel.discord_id == ctx_or_inter.guild.id)
                 )
             ).first() is None:
                 raise GuildNotConfiguredError()
@@ -75,22 +71,14 @@ class StarBot(Bot):
         for file in Path(module.replace(".", "/")).iterdir():
             if file.is_dir():
                 self.find_extensions(f"{module}.{file.name}")
-            elif (
-                file.is_file()
-                and file.name.endswith(".py")
-                and not file.name.startswith("_")
-            ):
+            elif file.is_file() and file.name.endswith(".py") and not file.name.startswith("_"):
                 # Check if this actually contain an extension, meaning it has a setup function
                 module_name = f"{module}.{file.stem}"
 
                 try:
                     tree = ast.parse(file.read_text())
 
-                    if any(
-                        f.name == "setup"
-                        for f in tree.body
-                        if isinstance(f, ast.FunctionDef)
-                    ):
+                    if any(f.name == "setup" for f in tree.body if isinstance(f, ast.FunctionDef)):
                         logger.info(f"Loading extension {module_name}")
                         self.all_extensions.append(module_name)
                         self.load_extension(module_name)

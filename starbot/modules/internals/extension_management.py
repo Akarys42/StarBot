@@ -102,29 +102,17 @@ class ExtensionManagement(Cog):
     @load.autocomplete("ext")
     def load_autocomplete(self, _inter: ACI, query: str) -> list[str]:
         """Autocomplete for the load command."""
-        return [
-            ext
-            for ext, status in self._list_extension_status()
-            if query in ext and not status
-        ]
+        return [ext for ext, status in self._list_extension_status() if query in ext and not status]
 
     @unload.autocomplete("ext")
     def unload_autocomplete(self, _inter: ACI, query: str) -> list[str]:
         """Autocomplete for the unload command."""
-        return [
-            ext
-            for ext, status in self._list_extension_status()
-            if query in ext and status
-        ]
+        return [ext for ext, status in self._list_extension_status() if query in ext and status]
 
     @reload.autocomplete("ext")
     def reload_autocomplete(self, _inter: ACI, query: str) -> list[str]:
         """Autocomplete for the reload command."""
-        return [
-            ext
-            for ext, status in self._list_extension_status()
-            if query in ext and status
-        ]
+        return [ext for ext, status in self._list_extension_status() if query in ext and status]
 
 
 def setup(bot: StarBot) -> None:

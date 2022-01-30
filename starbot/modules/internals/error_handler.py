@@ -33,18 +33,14 @@ class ErrorHandler(Cog):
                         ":x: This guild is not configured yet. Please contact the server owner."
                     )
                 else:
-                    await ctx.send(
-                        ":x: This guild is not configured yet. Please run `/configure`."
-                    )
+                    await ctx.send(":x: This guild is not configured yet. Please run `/configure`.")
             # Disnake errors
             case errors.CommandNotFound():
                 logger.debug(f"Command not found: {ctx.command.name}")
             case errors.CommandOnCooldown():
                 await error_embed(ctx, "This command is on cooldown.")
             case errors.CheckFailure():
-                await error_embed(
-                    ctx, "You do not have permission to use this command."
-                )
+                await error_embed(ctx, "You do not have permission to use this command.")
             case errors.CommandInvokeError():
                 logger.error(
                     f"Error while invoking command {ctx.command.name} by {ctx.author}: {error}",
@@ -57,13 +53,9 @@ class ErrorHandler(Cog):
             case errors.MissingRequiredArgument():
                 await error_embed(ctx, f"You are missing a required argument: {error}")
             case errors.BadArgument():
-                await error_embed(
-                    ctx, f"You have provided an invalid argument: {error}"
-                )
+                await error_embed(ctx, f"You have provided an invalid argument: {error}")
             case errors.BadUnionArgument():
-                await error_embed(
-                    ctx, f"You have provided an invalid argument: {error}"
-                )
+                await error_embed(ctx, f"You have provided an invalid argument: {error}")
             case errors.TooManyArguments():
                 await error_embed(ctx, f"You have provided too many arguments: {error}")
             case errors.UserInputError():
@@ -89,9 +81,7 @@ class ErrorHandler(Cog):
             case errors.CommandOnCooldown():
                 await error_embed(inter, "This command is on cooldown.")
             case errors.CheckFailure():
-                await error_embed(
-                    inter, "You do not have permission to use this command."
-                )
+                await error_embed(inter, "You do not have permission to use this command.")
             case errors.CommandInvokeError():
                 logger.error(
                     f"Error while invoking command {inter.data.name} by {inter.author}: {error}",
@@ -102,13 +92,9 @@ class ErrorHandler(Cog):
                     "An error occurred while executing this command. Please let us know.",
                 )
             case errors.BadArgument():
-                await error_embed(
-                    inter, f"You have provided an invalid argument: {error}"
-                )
+                await error_embed(inter, f"You have provided an invalid argument: {error}")
             case errors.BadUnionArgument():
-                await error_embed(
-                    inter, f"You have provided an invalid argument: {error}"
-                )
+                await error_embed(inter, f"You have provided an invalid argument: {error}")
             case errors.UserInputError():
                 await error_embed(inter, f"Your input seems off: {error}")
 
