@@ -19,11 +19,13 @@ class ErrorHandler(Cog):
 
     async def error_embed(self, ctx_or_inter: Context | ACI, message: str) -> None:
         """Creates an error embed and send it to ctx_or_inter."""
-        config = await self.bot.get_config(ctx_or_inter)
+        try:
+            config = await self.bot.get_config(ctx_or_inter)
+            color = config.colors.danger
+        except GuildNotConfiguredError:
+            color = 0xED4245
 
-        await ctx_or_inter.send(
-            embed=Embed(title="Error", description=message, color=config.colors.danger)
-        )
+        await ctx_or_inter.send(embed=Embed(title="Error", description=message, color=color))
 
     @Cog.listener()
     async def on_slash_command_error(self, inter: ACI, error: CommandError) -> None:
