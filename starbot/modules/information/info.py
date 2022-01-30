@@ -17,7 +17,7 @@ class Info(Cog):
         """Get general information about the bot."""
         config = await self.bot.get_config(inter)
 
-        embed = Embed(title="Status", color=int(config.color.info))
+        embed = Embed(title="Status", color=config.color.info)
 
         embed.add_field(name="Latency", value=f"{self.bot.latency * 1000:.2f}ms")
         embed.add_field(

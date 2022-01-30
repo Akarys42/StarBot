@@ -45,8 +45,15 @@ class GuildConfig:
             return GuildConfig(self.guild_id, self.entries, path)
 
     def _convert_entry(self, value: str, definition: dict) -> Any:
-        # TODO
-        return value
+        match definition["type"]:
+            case "int":
+                return int(value)
+            case "bool":
+                return value.lower() in ["true", "t", "yes", "y", "1"]
+            case "str":
+                return value
+            case _:
+                raise ValueError(f"Unknown type '{definition['type']}'.")
 
     def __str__(self) -> str:
         return f"<GuildConfig(guild_id={self.guild_id})>"
