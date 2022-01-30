@@ -1,4 +1,4 @@
-color:
+colors:
   danger:
     type: int
     default: 0xED4245

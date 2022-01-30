@@ -3,7 +3,7 @@
 # The content of this file is based on the config-definition.yaml file.
 # It is used to provide type hints for the config module, to be used by your IDE.
 class GuildConfig:
-    class color:
+    class colors:
         danger: int
         warning: int
         info: int
