@@ -33,6 +33,7 @@ class ExtensionManagement(Cog):
         """Return whether the extension is loaded or not."""
         return ext in self.bot.extensions.keys()
 
+    @bypass_guild_configured_check
     @slash_command()
     async def exts(self, inter: ACI) -> None:
         """Manage loaded extensions."""

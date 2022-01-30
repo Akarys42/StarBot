@@ -10,9 +10,9 @@ class GuildModel(Base):
     __tablename__ = "guild"
 
     id = Column(Integer, primary_key=True)
-    discord_id = Column(BigInteger, unique=True)
+    guild_id = Column(BigInteger, unique=True)
 
     config_entries = relationship("ConfigEntryModel", back_populates="guild")
 
     def __repr__(self) -> str:
-        return f"<GuildModel(id={self.id}, discord_id={self.discord_id})>"
+        return f"<GuildModel(id={self.id}, discord_id={self.guild_id})>"

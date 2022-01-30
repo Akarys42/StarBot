@@ -1,15 +1,15 @@
 """Add guild and config entries
 
-Revision ID: 07d507061c59
+Revision ID: b7e301f75156
 Revises:
-Create Date: 2022-01-27 16:01:40.067484
+Create Date: 2022-01-30 20:44:34.184783
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "07d507061c59"
+revision = "b7e301f75156"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -20,19 +20,19 @@ def upgrade():
     op.create_table(
         "guild",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("discord_id", sa.BigInteger(), nullable=True),
+        sa.Column("guild_id", sa.BigInteger(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("discord_id"),
+        sa.UniqueConstraint("guild_id"),
     )
     op.create_table(
         "config_entry",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("guild_id", sa.Integer(), nullable=True),
+        sa.Column("guild_id", sa.BigInteger(), nullable=False),
         sa.Column("key", sa.String(length=255), nullable=True),
         sa.Column("value", sa.String(length=255), nullable=True),
         sa.ForeignKeyConstraint(
             ["guild_id"],
-            ["guild.id"],
+            ["guild.guild_id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import BigInteger, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from starbot.models._base import Base
@@ -10,7 +10,7 @@ class ConfigEntryModel(Base):
     __tablename__ = "config_entry"
 
     id = Column(Integer, primary_key=True)
-    guild_id = Column(Integer, ForeignKey("guild.id"))
+    guild_id = Column(BigInteger, ForeignKey("guild.guild_id"), nullable=False)
 
     key = Column(String(255))
     value = Column(String(255))

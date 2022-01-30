@@ -38,7 +38,7 @@ class StarBot(Bot):
                 await session.execute(
                     select(GuildModel)
                     .options(selectinload(GuildModel.config_entries))
-                    .where(GuildModel.discord_id == ctx_or_inter.guild.id)
+                    .where(GuildModel.guild_id == ctx_or_inter.guild.id)
                 )
             ).first()
 
@@ -60,7 +60,7 @@ class StarBot(Bot):
         async with self.Session() as session:
             if (
                 await session.execute(
-                    select(GuildModel).where(GuildModel.discord_id == ctx_or_inter.guild.id)
+                    select(GuildModel).where(GuildModel.guild_id == ctx_or_inter.guild.id)
                 )
             ).first() is None:
                 raise GuildNotConfiguredError()

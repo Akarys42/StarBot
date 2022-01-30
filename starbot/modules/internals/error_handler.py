@@ -40,7 +40,7 @@ class ErrorHandler(Cog):
                     )
                 else:
                     await inter.send(
-                        ":x: This guild is not configured yet. Please run `/configure`.",
+                        ":x: This guild is not configured yet. Please run `/config setup`.",
                         ephemeral=True,
                     )
             # Disnake errors
