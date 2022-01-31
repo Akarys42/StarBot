@@ -1,12 +1,17 @@
+from io import StringIO
+
+import yaml
+from aiohttp import ClientError
+from disnake import File
 from disnake.ext.commands import Cog, slash_command
-from sqlalchemy import and_, select
+from sqlalchemy import and_, delete, select
 
 from starbot.bot import StarBot
 from starbot.checks import is_guild_owner
 from starbot.configuration.definition import DEFINITION
-from starbot.configuration.utils import get_dotted_path
+from starbot.configuration.utils import config_to_tree, get_dotted_path
 from starbot.constants import ACI
-from starbot.decorators import bypass_guild_configured_check
+from starbot.decorators import bypass_guild_configured_check, multi_autocomplete
 from starbot.models import ConfigEntryModel, GuildModel
 
 
@@ -15,6 +20,20 @@ class Configuration(Cog):
 
     def __init__(self, bot: StarBot) -> None:
         self.bot = bot
+        self.autocomplete_fields = {}
+
+        self._populate_autocomplete_fields()
+
+    def _populate_autocomplete_fields(self, path: str = "") -> None:
+        """Populate the autocomplete fields starting from `path`."""
+        for key, value in get_dotted_path(DEFINITION, path).items():
+            new_path = f"{path}.{key}" if path else key
+
+            assert isinstance(value, dict)
+            if "type" in value:
+                self.autocomplete_fields[f"{value['description']} ({new_path})"] = new_path
+            else:
+                self._populate_autocomplete_fields(new_path)
 
     @bypass_guild_configured_check
     @slash_command()
@@ -54,6 +73,156 @@ class Configuration(Cog):
                 entry[0].value = value
             await session.commit()
         await inter.send(f":white_check_mark: Configuration updated: `{key}` set to `{value}`.")
+
+    @config.sub_command()
+    async def get(self, inter: ACI, key: str) -> None:
+        """Get the value of a configuration key."""
+        # Check if the key is valid
+        if not get_dotted_path(DEFINITION, key):
+            await inter.send(":x: Invalid configuration key.", ephemeral=True)
+            return
+
+        # Check if the key is set or not
+        async with self.bot.Session() as session:
+            query = select(ConfigEntryModel).where(
+                and_(ConfigEntryModel.key == key, ConfigEntryModel.guild_id == inter.guild.id)
+            )
+            entry = (await session.execute(query)).first()
+
+            if entry is None:
+                message = f"Configuration key `{key}` isn't set. Default value: "
+            else:
+                message = f"Configuration key `{key}`: "
+
+        config = await self.bot.get_config(inter)
+        for part in key.split("."):
+            config = getattr(config, part)
+
+        await inter.send(f"{message}{config}")
+
+    @config.sub_command()
+    async def reset(self, inter: ACI, key: str) -> None:
+        """Reset a configuration key to its default value."""
+        # Check if the key is valid
+        if not (definition := get_dotted_path(DEFINITION, key)):
+            await inter.send(":x: Invalid configuration key.", ephemeral=True)
+            return
+
+        async with self.bot.Session() as session:
+            query = delete(ConfigEntryModel).where(
+                and_(ConfigEntryModel.key == key, ConfigEntryModel.guild_id == inter.guild.id)
+            )
+            rowcount = (await session.execute(query)).rowcount
+
+            if rowcount == 0:
+                await inter.send(
+                    f":x: The default value for `{key}` is already set: `{definition['default']}`.",
+                    ephemeral=True,
+                )
+            else:
+                await session.commit()
+                await inter.send(
+                    f":white_check_mark: Configuration reset: `{key}` reset "
+                    f"to `{definition['default']}`."
+                )
+
+    @config.sub_command("import")
+    async def import_(self, inter: ACI, url: str) -> None:
+        """
+        Import a configuration from a URL.
+
+        Warning: This will overwrite your current configuration.
+        """
+        try:
+            async with self.bot.aiohttp.get(url) as resp:
+                resp.raise_for_status()
+
+                config = yaml.safe_load(await resp.text())
+        except ClientError:
+            await inter.send(":x: Invalid URL.", ephemeral=True)
+            return
+        except yaml.YAMLError:
+            await inter.send(":x: Invalid YAML.", ephemeral=True)
+            return
+
+        if not isinstance(config, dict):
+            await inter.send(":x: Invalid configuration.", ephemeral=True)
+            return
+
+        # Drop existing config
+        async with self.bot.Session() as session:
+            query = delete(ConfigEntryModel).where(ConfigEntryModel.guild_id == inter.guild.id)
+            await session.execute(query)
+
+            added = 0
+            ignored = 0
+            invalid = 0
+
+            # Import new config
+            nodes = [(config, "")]
+            while nodes:
+                node, path = nodes.pop()
+
+                for key, value in node.items():
+                    new_path = f"{path}.{key}" if path else key
+
+                    # If the value is a dict, add it to the stack
+                    if isinstance(value, dict):
+                        nodes.append((value, new_path))
+                    # Otherwise check the key is valid and add it to the database
+                    else:
+                        definition = get_dotted_path(DEFINITION, new_path)
+                        if not definition:
+                            invalid += 1
+                            continue
+
+                        try:
+                            (await self.bot.get_config(inter)).convert_entry(value, definition)
+                        except ValueError:
+                            invalid += 1
+                            continue
+
+                        if value == definition["default"]:
+                            ignored += 1
+                            continue
+
+                        entry = ConfigEntryModel(
+                            key=new_path, value=str(value), guild_id=inter.guild.id
+                        )
+                        session.add(entry)
+                        added += 1
+
+            await session.commit()
+            await inter.send(
+                f":white_check_mark: Configuration imported: {added} entries added, "
+                f"{ignored} ignored, {invalid} invalid."
+            )
+
+    @config.sub_command()
+    async def export(self, inter: ACI) -> None:
+        """Upload the configuration as a YAML file."""
+        config = await self.bot.get_config(inter)
+        tree = config_to_tree(config)
+
+        file = StringIO()
+        yaml.dump(tree, file)
+        file.seek(0)
+
+        await inter.send(
+            "Configuration uploaded as an attachment", file=File(file, "configuration.yaml")
+        )
+
+    @multi_autocomplete((set, "key"), (get, "key"), (reset, "key"))
+    async def set_key_autocomplete(self, inter: ACI, prefix: str) -> dict[str, str] | list[str]:
+        """Autocomplete the configuration key."""
+        # If it is a valid path, we return direct paths
+        if "." in prefix and " " not in prefix:
+            return [
+                value for value in self.autocomplete_fields.values() if value.startswith(prefix)
+            ]
+
+        # Otherwise we match both the description and the path
+        return {key: value for key, value in self.autocomplete_fields.items() if prefix in key}
 
     @bypass_guild_configured_check
     @is_guild_owner()

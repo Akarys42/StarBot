@@ -11,6 +11,7 @@ def main() -> None:
     coloredlogs.install(level="DEBUG")
 
     logging.getLogger("disnake").setLevel(logging.WARNING)
+    logging.getLogger("charset_normalizer").setLevel(logging.WARNING)
 
     bot = StarBot.new()
 

@@ -62,6 +62,7 @@ class ExtensionManagement(Cog):
             logger.info(f"Manually loaded extension {ext}.")
         except Exception as e:
             await inter.send(f":x: Failed to load extension `{ext}`: {e}")
+            logger.exception(f"Failed to load extension `{ext}`.")
             return
 
         await inter.send(f":white_check_mark: extension `{ext}` loaded.")
@@ -79,6 +80,7 @@ class ExtensionManagement(Cog):
             logger.info(f"Manually unloaded extension {ext}.")
         except Exception as e:
             await inter.send(f":x: Failed to unload extension `{ext}`: {e}")
+            logger.exception(f"Failed to unload extension `{ext}`.")
             return
 
         await inter.send(f":white_check_mark: extension `{ext}` unloaded.")
@@ -96,6 +98,7 @@ class ExtensionManagement(Cog):
             logger.info(f"Manually reloaded extension {ext}.")
         except Exception as e:
             await inter.send(f":x: Failed to reload extension `{ext}`: {e}")
+            logger.exception(f"Failed to reload extension `{ext}`.")
             return
 
         await inter.send(f":white_check_mark: extension `{ext}` reloaded.")

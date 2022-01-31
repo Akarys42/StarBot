@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 
 import arrow
+from aiohttp import ClientSession
 from disnake import AllowedMentions, Game, Intents
 from disnake.ext.commands import Bot, Context
 from sqlalchemy import select
@@ -28,6 +29,7 @@ class StarBot(Bot):
 
         self.engine = create_async_engine(DATABASE_URL)
         self.Session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
+        self.aiohttp = ClientSession(loop=self.loop)
 
         self.add_app_command_check(self._is_guild_configured_check, slash_commands=True)
 
