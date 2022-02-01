@@ -4,9 +4,11 @@
 # It is used to provide type hints for the config module, to be used by your IDE.
 
 # fmt: off
-class GuildConfig:
+from starbot.configuration.config_abc import ConfigABC
 
-    class colors:
+class GuildConfig(ConfigABC):
+
+    class colors(ConfigABC):
         danger: int
         warning: int
         info: int
