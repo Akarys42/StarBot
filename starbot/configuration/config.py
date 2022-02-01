@@ -2,11 +2,12 @@ from typing import Any
 
 from disnake import Permissions
 
+from starbot.configuration.config_abc import ConfigABC
 from starbot.configuration.definition import DEFINITION
 from starbot.configuration.utils import get_dotted_path
 
 
-class GuildConfig:
+class GuildConfig(ConfigABC):
     """
     Represents one node inside the guild configuration.
 
@@ -33,6 +34,16 @@ class GuildConfig:
         # If not, we can just nest another config
         else:
             return GuildConfig(self.guild_id, self.entries, path)
+
+    def get(self, key: str) -> Any:
+        """Get the value of a configuration entry."""
+        if not (definition := get_dotted_path(DEFINITION, key)):
+            raise KeyError(f"The configuration entry '{key}' does not exist.")
+
+        if key in self.entries:
+            return self.convert_entry(self.entries[key], definition)
+        else:
+            return self.convert_entry(definition["default"], definition)
 
     def convert_entry(self, value: str, definition: dict) -> Any:
         """Convert the string value to the correct type."""

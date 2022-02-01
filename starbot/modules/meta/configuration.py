@@ -7,7 +7,7 @@ from disnake.ext.commands import Cog, slash_command
 from sqlalchemy import and_, delete, select
 
 from starbot.bot import StarBot
-from starbot.checks import is_guild_owner
+from starbot.checks import is_guild_owner, require_permission
 from starbot.configuration.definition import DEFINITION
 from starbot.configuration.utils import config_to_tree, get_dotted_path
 from starbot.constants import ACI
@@ -41,6 +41,7 @@ class Configuration(Cog):
         """Configure the bot for your guild."""
         pass
 
+    @require_permission(role_id="config.perms.role", permissions="config.perms.discord")
     @config.sub_command()
     async def set(self, inter: ACI, key: str, value: str) -> None:
         """Set a configuration key to a value."""
@@ -74,11 +75,12 @@ class Configuration(Cog):
             await session.commit()
         await inter.send(f":white_check_mark: Configuration updated: `{key}` set to `{value}`.")
 
+    @require_permission(role_id="config.perms.role", permissions="config.perms.discord")
     @config.sub_command()
     async def get(self, inter: ACI, key: str) -> None:
         """Get the value of a configuration key."""
         # Check if the key is valid
-        if not get_dotted_path(DEFINITION, key):
+        if not (definition := get_dotted_path(DEFINITION, key)):
             await inter.send(":x: Invalid configuration key.", ephemeral=True)
             return
 
@@ -90,16 +92,15 @@ class Configuration(Cog):
             entry = (await session.execute(query)).first()
 
             if entry is None:
-                message = f"Configuration key `{key}` isn't set. Default value: "
+                message = (
+                    f"Configuration key `{key}` isn't set. Default value: `{definition['default']}`"
+                )
             else:
-                message = f"Configuration key `{key}`: "
+                message = f"Configuration key `{key}`: `{entry[0].value}`"
 
-        config = await self.bot.get_config(inter)
-        for part in key.split("."):
-            config = getattr(config, part)
+        await inter.send(message)
 
-        await inter.send(f"{message}{config}")
-
+    @require_permission(role_id="config.perms.role", permissions="config.perms.discord")
     @config.sub_command()
     async def reset(self, inter: ACI, key: str) -> None:
         """Reset a configuration key to its default value."""
@@ -160,6 +161,7 @@ class Configuration(Cog):
             case _:
                 return [value or " "]
 
+    @require_permission(role_id="config.perms.role", permissions="config.perms.discord")
     @config.sub_command("import")
     async def import_(self, inter: ACI, url: str) -> None:
         """
@@ -232,11 +234,12 @@ class Configuration(Cog):
                 f"{ignored} ignored, {invalid} invalid."
             )
 
+    @require_permission(role_id="config.perms.role", permissions="config.perms.discord")
     @config.sub_command()
-    async def export(self, inter: ACI) -> None:
+    async def export(self, inter: ACI, include_defaults: bool = False) -> None:
         """Upload the configuration as a YAML file."""
         config = await self.bot.get_config(inter)
-        tree = config_to_tree(config)
+        tree = config_to_tree(config, include_defaults=include_defaults)
 
         file = StringIO()
         yaml.dump(tree, file)

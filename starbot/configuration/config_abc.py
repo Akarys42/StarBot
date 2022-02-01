@@ -14,6 +14,11 @@ class ConfigABC(ABC):
         ...
 
     @abstractmethod
+    def get(self, key: str) -> Any:
+        """Get the value of a key."""
+        ...
+
+    @abstractmethod
     def convert_entry(self, value: str, definition: dict) -> Any:
         """Convert the string value to the correct type."""
         ...

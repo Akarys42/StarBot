@@ -6,7 +6,7 @@ config:
       description: Role required to change the configuration
     discord:
       type: discord_permission
-      default: manage_guild
+      default: administrator
       description: Discord permission required to change the configuration
 colors:
   danger:
