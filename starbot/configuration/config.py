@@ -1,5 +1,7 @@
 from typing import Any
 
+from disnake import Permissions
+
 from starbot.configuration.definition import DEFINITION
 from starbot.configuration.utils import get_dotted_path
 
@@ -35,10 +37,14 @@ class GuildConfig:
     def convert_entry(self, value: str, definition: dict) -> Any:
         """Convert the string value to the correct type."""
         match definition["type"]:
+            case "role":
+                return int(value)
             case "int":
                 return int(value)
             case "bool":
                 return value.lower() in ["true", "t", "yes", "y", "1"]
+            case "discord_permission":
+                return Permissions(**{value: True})
             case "str":
                 return value
             case _:

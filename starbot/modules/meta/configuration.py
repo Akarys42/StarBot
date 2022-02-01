@@ -2,7 +2,7 @@ from io import StringIO
 
 import yaml
 from aiohttp import ClientError
-from disnake import File
+from disnake import File, Permissions
 from disnake.ext.commands import Cog, slash_command
 from sqlalchemy import and_, delete, select
 
@@ -125,6 +125,40 @@ class Configuration(Cog):
                     f":white_check_mark: Configuration reset: `{key}` reset "
                     f"to `{definition['default']}`."
                 )
+
+    @set.autocomplete("value")
+    async def set_value_autocomplete(self, inter: ACI, value: str) -> dict[str, str] | list[str]:
+        """
+        Tries to autocomplete the value based on the configuration key type.
+
+        Due to a Discord limitation we have to echo the parameter back to the user
+        if we don't have any special handling for that type.
+        """
+        key = inter.options["set"]["key"]
+
+        if not (definition := get_dotted_path(DEFINITION, key)):
+            return ["Invalid configuration key."]
+
+        match definition["type"]:
+            case "role":
+                return {
+                    f"{role.name} ({role.id})": str(role.id)
+                    for role in inter.guild.roles
+                    if value in f"{role.name} ({role.id})"
+                }
+            case "discord_permission":
+                perms = {}
+
+                for name, _ in Permissions():
+                    if len(perms) >= 25:
+                        break
+
+                    if value.lower().replace(" ", "_") in name:
+                        perms[name.replace("_", " ").capitalize()] = name
+
+                return perms
+            case _:
+                return [value or " "]
 
     @config.sub_command("import")
     async def import_(self, inter: ACI, url: str) -> None:

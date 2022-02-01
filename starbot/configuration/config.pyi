@@ -8,6 +8,12 @@ from starbot.configuration.config_abc import ConfigABC
 
 class GuildConfig(ConfigABC):
 
+    class config(ConfigABC):
+
+        class perms(ConfigABC):
+            role: int
+            discord: str
+
     class colors(ConfigABC):
         danger: int
         warning: int

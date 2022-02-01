@@ -1,3 +1,13 @@
+config:
+  perms:
+    role:
+      type: role
+      default: null
+      description: Role required to change the configuration
+    discord:
+      type: discord_permission
+      default: manage_guild
+      description: Discord permission required to change the configuration
 colors:
   danger:
     type: int

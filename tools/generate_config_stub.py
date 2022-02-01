@@ -7,6 +7,8 @@ from typing import Optional
 
 import yaml
 
+from starbot.configuration.definition import SPECIAL_TYPES
+
 HELP_TEXT = """
 This script generates the typing stub for the config module.
 
@@ -41,7 +43,9 @@ def add_node(base: Optional[ClassDef], name: str, node: dict) -> ClassDef:
     new_node = ClassDef(
         name=name,
         body=[
-            AnnAssign(target=Name(id=key), annotation=Name(id=value), simple=1)
+            AnnAssign(
+                target=Name(id=key), annotation=Name(id=SPECIAL_TYPES.get(value, value)), simple=1
+            )
             for key, value in node.items()
         ],
         decorator_list=[],
