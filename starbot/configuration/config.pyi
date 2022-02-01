@@ -2,7 +2,10 @@
 # Do not modify this file directly.
 # The content of this file is based on the config-definition.yaml file.
 # It is used to provide type hints for the config module, to be used by your IDE.
+
+# fmt: off
 class GuildConfig:
+
     class colors:
         danger: int
         warning: int

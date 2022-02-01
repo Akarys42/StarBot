@@ -19,6 +19,8 @@ HEADER = """
 # Do not modify this file directly.
 # The content of this file is based on the config-definition.yaml file.
 # It is used to provide type hints for the config module, to be used by your IDE.
+
+# fmt: off
 """.strip()
 
 TARGET = Path("starbot/configuration/config.pyi")
@@ -83,6 +85,7 @@ def main() -> None:
         file.write(HEADER)
         file.write("\n")
         file.write(ast.unparse(root))
+        file.write("\n")
 
     print(f"Wrote typing stub to {TARGET}")
 

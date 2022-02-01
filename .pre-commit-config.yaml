@@ -35,3 +35,11 @@ repos:
         entry: poetry run python -m flake8
         require_serial: true
         pass_filenames: false
+
+      - id: generate_config_sub
+        name: Config stub
+        description: Generate the typing stub for the config module
+        language: system
+        entry: poetry run python tools/generate_config_stub.py
+        require_serial: true
+        pass_filenames: false
