@@ -1,7 +1,7 @@
 import ast
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import arrow
 from aiohttp import ClientSession
@@ -91,6 +91,10 @@ class StarBot(InteractionBot):
                         self.load_extension(module_name)
                 except SyntaxError as e:
                     logger.warning(f"{module_name} contains a syntax error:\n{e}")
+
+    async def on_error(self, event_method: str, *args: Any, **kwargs: Any) -> None:
+        """Log errors using the logging system."""
+        logger.exception(f"Error in {event_method!r}. Args: {args}, kwargs: {kwargs}")
 
     @classmethod
     def new(cls) -> "StarBot":

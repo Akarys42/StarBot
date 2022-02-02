@@ -12,6 +12,8 @@ from starbot.bot import StarBot
 from starbot.constants import DEBUG, GIT_SHA
 
 # Scam list API
+from starbot.exceptions import GuildNotConfiguredError
+
 API_ALL = "https://phish.sinking.yachts/v2/all"
 API_WS = "wss://phish.sinking.yachts/feed"
 
@@ -94,7 +96,10 @@ class Phishing(Cog):
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
         """Find phishing links in messages."""
-        config = await self.bot.get_config(guild_id=message.guild.id)
+        try:
+            config = await self.bot.get_config(guild_id=message.guild.id)
+        except GuildNotConfiguredError:
+            return
 
         if not self.ready or not config.phishing.should_filter:
             return
