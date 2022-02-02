@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG = os.getenv("DEBUG", "") != ""
+DEBUG = os.getenv("DEBUG", None) is not None
 DEFAULT_PREFIX = os.getenv("DEFAULT_PREFIX", "$")
 TEST_GUILDS = (
     [int(id_) for id_ in os.getenv("TEST_GUILDS").split(",")]

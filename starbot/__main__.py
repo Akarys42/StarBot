@@ -3,12 +3,12 @@ import logging
 import coloredlogs
 
 from starbot.bot import StarBot
-from starbot.constants import GIT_SHA, TOKEN
+from starbot.constants import GIT_SHA, LOGGING_LEVEL, TOKEN
 
 
 def main() -> None:
     """Prepare the bot and start it."""
-    coloredlogs.install(level="DEBUG")
+    coloredlogs.install(level=LOGGING_LEVEL)
 
     logging.getLogger("disnake").setLevel(logging.WARNING)
     logging.getLogger("charset_normalizer").setLevel(logging.WARNING)
