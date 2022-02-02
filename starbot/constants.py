@@ -7,7 +7,11 @@ load_dotenv()
 
 DEBUG = os.getenv("DEBUG", "") != ""
 DEFAULT_PREFIX = os.getenv("DEFAULT_PREFIX", "$")
-TEST_GUILDS = [int(id_) for id_ in os.getenv("TEST_GUILDS", "").split(",")]
+TEST_GUILDS = (
+    [int(id_) for id_ in os.getenv("TEST_GUILDS").split(",")]
+    if os.getenv("TEST_GUILDS", None)
+    else []
+)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 if not DATABASE_URL:
