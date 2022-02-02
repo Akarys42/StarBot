@@ -1,9 +1,13 @@
+from string import Template
+
 from disnake import Embed
 from disnake.ext.commands import Cog, slash_command
 
 from starbot.bot import StarBot
-from starbot.constants import ACI
+from starbot.constants import ACI, GIT_SHA
 from starbot.utils.time import TimestampFormats, discord_timestamp
+
+REPO_URL = "https://git.akarys.me/StarBot"
 
 
 class Info(Cog):
@@ -17,13 +21,22 @@ class Info(Cog):
         """Get general information about the bot."""
         config = await self.bot.get_config(inter)
 
-        embed = Embed(title="Status", color=config.colors.info)
+        description = Template(config.bot.description).safe_substitute(
+            display_name=inter.me.display_name
+        )
+
+        embed = Embed(
+            title=inter.me.display_name, description=description, color=config.colors.info
+        )
 
         embed.add_field(name="Latency", value=f"{self.bot.latency * 1000:.2f}ms")
         embed.add_field(
             name="Uptime",
             value=f"Started {discord_timestamp(self.bot.start_time, TimestampFormats.RELATIVE)}",
         )
+        embed.add_field(name="Running", value=f"[**StarBot**]({REPO_URL}), *build `{GIT_SHA}`*")
+        embed.set_thumbnail(self.bot.user.avatar.url)
+
         await inter.send(embed=embed)
 
 

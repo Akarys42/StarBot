@@ -21,6 +21,8 @@ TOKEN = os.getenv("TOKEN", "")
 if not TOKEN:
     raise ValueError("TOKEN is not set")
 
+GIT_SHA = os.getenv("GIT_SHA", "unknown")
+
 LOGGING_LEVEL = os.getenv("LOGGING_LEVEL", "DEBUG" if DEBUG else "INFO")
 
 # Typing aliases

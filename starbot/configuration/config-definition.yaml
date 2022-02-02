@@ -1,3 +1,9 @@
+bot:
+  description:
+    type: str
+    default: |
+      ${display_name} is a general purpose bot aiming to provide the essential functionalities needed to run your community, while being an open-source alternative to larger bots.
+    description: The description of the bot
 config:
   perms:
     role:
@@ -11,17 +17,17 @@ config:
 colors:
   danger:
     type: int
-    default: 0xED4245
+    default: "0xED4245"
     description: Color for the danger level
   warning:
     type: int
-    default: 0xFEE75C
+    default: "0xFEE75C"
     description: Color for the warning level
   info:
     type: int
-    default: 0x5865F2
+    default: "0x5865F2"
     description: Color for the info level
   success:
     type: int
-    default: 0x57F287
+    default: "0x57F287"
     description: Color for the success level

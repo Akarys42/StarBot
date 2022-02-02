@@ -19,6 +19,6 @@ class ConfigABC(ABC):
         ...
 
     @abstractmethod
-    def convert_entry(self, value: str, definition: dict) -> Any:
+    def convert_entry(self, value: Any, definition: dict) -> Any:
         """Convert the string value to the correct type."""
         ...

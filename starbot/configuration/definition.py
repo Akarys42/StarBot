@@ -4,7 +4,7 @@ from yaml import safe_load
 
 SPECIAL_TYPES = {
     "role": "int",
-    "discord_permission": "str",
+    "discord_permission": "disnake.Permissions",
 }
 
 _DEFINITION_FILE = Path("starbot/configuration/config-definition.yaml")

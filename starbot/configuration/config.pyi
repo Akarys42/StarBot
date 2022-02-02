@@ -4,15 +4,21 @@
 # It is used to provide type hints for the config module, to be used by your IDE.
 
 # fmt: off
+
+import disnake
+
 from starbot.configuration.config_abc import ConfigABC
 
 class GuildConfig(ConfigABC):
+
+    class bot(ConfigABC):
+        description: str
 
     class config(ConfigABC):
 
         class perms(ConfigABC):
             role: int
-            discord: str
+            discord: disnake.Permissions
 
     class colors(ConfigABC):
         danger: int

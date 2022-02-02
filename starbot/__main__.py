@@ -3,7 +3,7 @@ import logging
 import coloredlogs
 
 from starbot.bot import StarBot
-from starbot.constants import TOKEN
+from starbot.constants import GIT_SHA, TOKEN
 
 
 def main() -> None:
@@ -18,7 +18,7 @@ def main() -> None:
     logging.info("Loading extensions")
     bot.find_extensions()
 
-    logging.info("Starting bot")
+    logging.info(f"Starting bot {GIT_SHA!r}")
     bot.run(TOKEN)
 
 

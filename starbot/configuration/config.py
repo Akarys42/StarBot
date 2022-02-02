@@ -45,13 +45,16 @@ class GuildConfig(ConfigABC):
         else:
             return self.convert_entry(definition["default"], definition)
 
-    def convert_entry(self, value: str, definition: dict) -> Any:
+    def convert_entry(self, value: Any, definition: dict) -> Any:
         """Convert the string value to the correct type."""
+        if value is None:
+            return None
+
         match definition["type"]:
             case "role":
                 return int(value)
             case "int":
-                return int(value)
+                return int(value, base=0)
             case "bool":
                 return value.lower() in ["true", "t", "yes", "y", "1"]
             case "discord_permission":

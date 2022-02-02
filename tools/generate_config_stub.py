@@ -23,6 +23,9 @@ HEADER = """\
 # It is used to provide type hints for the config module, to be used by your IDE.
 
 # fmt: off
+
+import disnake
+
 from starbot.configuration.config_abc import ConfigABC
 """
 
