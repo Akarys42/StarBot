@@ -142,11 +142,15 @@ class Configuration(Cog):
 
         match definition["type"]:
             case "role":
-                return {
-                    f"{role.name} ({role.id})": str(role.id)
-                    for role in inter.guild.roles or await inter.guild.fetch_roles()
-                    if value in f"{role.name} ({role.id})"
-                }
+                roles = {}
+
+                for role in inter.guild.roles or await inter.guild.fetch_roles():
+                    if len(roles) >= 25:
+                        break
+
+                    if value in f"{role.name} ({role.id})":
+                        roles[f"{role.name} ({role.id})"] = str(role.id)
+                return roles
             case "discord_permission":
                 perms = {}
 
@@ -161,7 +165,7 @@ class Configuration(Cog):
             case "bool":
                 return ["True", "False"]
             case "choice":
-                return [choice for choice in definition["choices"] if value in choice]
+                return [choice for choice in definition["choices"] if value in choice][:25]
             case _:
                 return [value or " "]  # Need to return something else than an empty string
 
