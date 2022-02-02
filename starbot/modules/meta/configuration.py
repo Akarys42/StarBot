@@ -158,8 +158,12 @@ class Configuration(Cog):
                         perms[name.replace("_", " ").capitalize()] = name
 
                 return perms
+            case "bool":
+                return ["True", "False"]
+            case "choice":
+                return [choice for choice in definition["choices"] if value in choice]
             case _:
-                return [value or " "]
+                return [value or " "]  # Need to return something else than an empty string
 
     @require_permission(role_id="config.perms.role", permissions="config.perms.discord")
     @config.sub_command("import")

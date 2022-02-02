@@ -4,6 +4,35 @@ bot:
     default: |
       ${display_name} is a general purpose bot aiming to provide the essential functionalities needed to run your community, while being an open-source alternative to larger bots.
     description: The description of the bot
+
+phishing:
+  should_filter:
+    type: bool
+    default: "true"
+    description: Whether to filter out phishing links
+  action:
+    type: choice
+    choices:
+      - kick
+      - ban
+      - ignore
+    default: kick
+    description: What action to perform when a phishing link is detected
+  dm:
+    type: str
+    default: |
+      Hi ${user}. Your account has been used to send links to a phishing website. ${action}
+      If you are not aware of sending them, that means your account has been compromised.
+
+      Here is a guide from Discord on how to change your password: ${LINK_PASSWORD}.
+
+      We also highly recommend that you enable 2-factor authentication on your account, for heightened security: ${LINK_2FA}.
+    description: The message to send to the user when a phishing link is detected
+  bypass_permission:
+    type: discord_permission
+    default: manage_messages
+    description: The permission required to bypass the phishing filter
+
 config:
   perms:
     role:
@@ -14,6 +43,7 @@ config:
       type: discord_permission
       default: administrator
       description: Discord permission required to change the configuration
+
 colors:
   danger:
     type: int

@@ -12,6 +12,7 @@ def main() -> None:
 
     logging.getLogger("disnake").setLevel(logging.WARNING)
     logging.getLogger("charset_normalizer").setLevel(logging.WARNING)
+    logging.getLogger("websockets").setLevel(logging.WARNING)
 
     bot = StarBot.new()
 

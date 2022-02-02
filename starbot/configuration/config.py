@@ -59,6 +59,10 @@ class GuildConfig(ConfigABC):
                 return value.lower() in ["true", "t", "yes", "y", "1"]
             case "discord_permission":
                 return Permissions(**{value: True})
+            case "choice":
+                if value not in definition["choices"]:
+                    raise ValueError(f"The value '{value}' is not in the list of choices.")
+                return value
             case "str":
                 return value
             case _:

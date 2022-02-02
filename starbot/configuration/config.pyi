@@ -14,6 +14,12 @@ class GuildConfig(ConfigABC):
     class bot(ConfigABC):
         description: str
 
+    class phishing(ConfigABC):
+        should_filter: bool
+        action: str
+        dm: str
+        bypass_permission: disnake.Permissions
+
     class config(ConfigABC):
 
         class perms(ConfigABC):

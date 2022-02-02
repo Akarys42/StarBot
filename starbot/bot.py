@@ -1,6 +1,7 @@
 import ast
 import logging
 from pathlib import Path
+from typing import Optional
 
 import arrow
 from aiohttp import ClientSession
@@ -33,14 +34,18 @@ class StarBot(InteractionBot):
 
         self.add_app_command_check(self._is_guild_configured_check, slash_commands=True)
 
-    async def get_config(self, ctx_or_inter: Context | ACI) -> GuildConfig:
+    async def get_config(
+        self, ctx_or_inter: Optional[Context | ACI] = None, *, guild_id: Optional[int] = None
+    ) -> GuildConfig:
         """Retrieve the guild's configuration."""
+        guild_id = guild_id or ctx_or_inter.guild.id
+
         async with self.Session() as session:
             guild = (
                 await session.execute(
                     select(GuildModel)
                     .options(selectinload(GuildModel.config_entries))
-                    .where(GuildModel.guild_id == ctx_or_inter.guild.id)
+                    .where(GuildModel.guild_id == guild_id)
                 )
             ).first()
 
@@ -48,7 +53,7 @@ class StarBot(InteractionBot):
             raise GuildNotConfiguredError()
 
         mapped = {entry.key: entry.value for entry in guild[0].config_entries}
-        return GuildConfig(ctx_or_inter.guild.id, mapped)
+        return GuildConfig(guild_id, mapped)
 
     async def _is_guild_configured_check(self, ctx_or_inter: Context | ACI) -> bool:
         """Return whether or not the guild is configured."""
