@@ -5,7 +5,7 @@ from pathlib import Path
 import arrow
 from aiohttp import ClientSession
 from disnake import AllowedMentions, Game, Intents
-from disnake.ext.commands import Bot, Context
+from disnake.ext.commands import Context, InteractionBot
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import selectinload, sessionmaker
@@ -18,7 +18,7 @@ from starbot.models.guild import GuildModel
 logger = logging.getLogger(__name__)
 
 
-class StarBot(Bot):
+class StarBot(InteractionBot):
     """Our main bot class."""
 
     def __init__(self, *args, **kwargs) -> None:
@@ -104,8 +104,6 @@ class StarBot(Bot):
 
         return cls(
             intents=intents,
-            command_prefix=None,
-            help_command=None,
             activity=Game(name="with slash commands!"),
             allowed_mentions=AllowedMentions(everyone=False, roles=False),
             test_guilds=TEST_GUILDS,
