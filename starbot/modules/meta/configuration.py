@@ -148,7 +148,7 @@ class Configuration(Cog):
                     if len(roles) >= 25:
                         break
 
-                    if value in f"{role.name} ({role.id})":
+                    if value.lower() in f"{role.name} ({role.id})".lower():
                         roles[f"{role.name} ({role.id})"] = str(role.id)
                 return roles
             case "discord_permission":
