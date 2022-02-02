@@ -35,7 +35,7 @@ class Info(Cog):
             value=f"Started {discord_timestamp(self.bot.start_time, TimestampFormats.RELATIVE)}",
         )
         embed.add_field(name="Running", value=f"[**StarBot**]({REPO_URL}), *build `{GIT_SHA}`*")
-        embed.set_thumbnail(self.bot.user.avatar.url)
+        embed.set_thumbnail(self.bot.user.display_avatar.url)
 
         await inter.send(embed=embed)
 
