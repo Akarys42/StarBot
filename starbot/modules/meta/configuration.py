@@ -144,7 +144,7 @@ class Configuration(Cog):
             case "role":
                 return {
                     f"{role.name} ({role.id})": str(role.id)
-                    for role in inter.guild.roles
+                    for role in inter.guild.roles or await inter.guild.fetch_roles()
                     if value in f"{role.name} ({role.id})"
                 }
             case "discord_permission":
