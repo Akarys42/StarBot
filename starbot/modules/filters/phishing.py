@@ -151,9 +151,9 @@ class Phishing(Cog):
                     if isinstance(message.author, Member):
                         match config.phishing.action:
                             case "ban":
-                                await message.author.ban()
+                                await message.author.ban(reason="Phishing link sent.")
                             case "kick":
-                                await message.author.kick()
+                                await message.author.kick(reason="Phishing link sent.")
                             case "ignore":
                                 pass
 
