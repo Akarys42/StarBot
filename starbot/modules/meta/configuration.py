@@ -260,6 +260,10 @@ class Configuration(Cog):
     @multi_autocomplete((set, "key"), (get, "key"), (reset, "key"))
     async def set_key_autocomplete(self, inter: ACI, prefix: str) -> dict[str, str] | list[str]:
         """Autocomplete the configuration key."""
+        # If we have just a dot, we return raw keys
+        if prefix == ".":
+            return list(self.autocomplete_fields.values())
+
         # If it is a valid path, we return direct paths
         if "." in prefix and " " not in prefix:
             return [

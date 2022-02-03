@@ -19,7 +19,7 @@ def main() -> None:
     logging.info("Loading extensions")
     bot.find_extensions()
 
-    logging.info(f"Starting bot {GIT_SHA!r}")
+    logging.info(f"Starting bot, build {GIT_SHA}")
     bot.run(TOKEN)
 
 
