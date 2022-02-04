@@ -7,6 +7,7 @@ from string import Template
 import websockets
 from disnake import Forbidden, Member, Message, NotFound
 from disnake.ext.commands import Cog
+from websockets.exceptions import ConnectionClosed
 
 from starbot.bot import StarBot
 from starbot.constants import DEBUG, GIT_SHA
@@ -73,25 +74,29 @@ class Phishing(Cog):
 
     async def consume_feed(self) -> None:
         """Connect to the domain feed and wait for changes."""
-        async with websockets.connect(API_WS, extra_headers=self.headers) as ws:
-            async for message in ws:
-                data = json.loads(message)
+        async for ws in websockets.connect(API_WS, extra_headers=self.headers):
+            try:
+                async for message in ws:
+                    data = json.loads(message)
 
-                match data["type"]:
-                    case "add":
-                        function = self.domains.add
-                    case "delete":
-                        function = self.domains.discard
-                    case _:
-                        logger.warning(f"Unknown message type: {data['type']}")
-                        continue
+                    match data["type"]:
+                        case "add":
+                            function = self.domains.add
+                        case "delete":
+                            function = self.domains.discard
+                        case _:
+                            logger.warning(f"Unknown message type: {data['type']}")
+                            continue
 
-                logger.debug(
-                    f"{data['type'].rstrip('e')}ing {data['domains']} from the domain list"
-                )
+                    logger.debug(
+                        f"{data['type'].rstrip('e')}ing {data['domains']} from the domain list"
+                    )
 
-                for domain in data["domains"]:
-                    function(domain)
+                    for domain in data["domains"]:
+                        function(domain)
+            except ConnectionClosed:
+                logger.info("Connection to the domain feed closed. Reconnecting...")
+                continue
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
