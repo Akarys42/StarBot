@@ -1,0 +1,19 @@
+name: Redeploy the bot
+
+on: [workflow_dispatch]
+concurrency:
+  group: redeploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Save the kubeconfig to a file to be used by kubectl, and roll the deployment
+      - name: Deploy using Kubectl
+        run: |
+          echo "$KUBECONFIG" > .kubeconfig
+          KUBECONFIG=.kubeconfig kubectl rollout restart deployment luna
+        env:
+          KUBECONFIG: ${{ secrets.KISSLAND_KUBECONFIG }}
