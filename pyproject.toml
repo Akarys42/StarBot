@@ -10,7 +10,7 @@ repository = "https://github.com/Akarys42/StarBot"
 
 [tool.poetry.dependencies]
 python = "^3.10.0"
-disnake = "^2.3"
+disnake = "^2.4"
 python-dotenv = "^0.19.2"
 coloredlogs = "^15.0.1"
 arrow = "^1.2.1"
