@@ -50,13 +50,16 @@ class GuildConfig(ConfigABC):
         if value is None:
             return None
 
+        if isinstance(value, str) and value.startswith("REF"):
+            return self.get(value.removeprefix("REF "))
+
         match definition["type"]:
-            case "role":
-                return int(value)
             case "int":
                 return int(value, base=0)
             case "bool":
                 return value.lower() in ["true", "t", "yes", "y", "1"]
+            case "discord_role" | "discord_channel":
+                return int(value)
             case "discord_permission":
                 return Permissions(**{value: True})
             case "choice":

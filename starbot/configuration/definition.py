@@ -3,8 +3,9 @@ from pathlib import Path
 from yaml import safe_load
 
 SPECIAL_TYPES = {
-    "role": "int",
+    "discord_role": "int",
     "discord_permission": "disnake.Permissions",
+    "discord_channel": "int",
     "choice": "str",
 }
 
