@@ -90,7 +90,7 @@ class StarBot(InteractionBot):
                         self.all_extensions.append(module_name)
                         self.load_extension(module_name)
                 except SyntaxError as e:
-                    logger.warning(f"{module_name} contains a syntax error:\n{e}")
+                    logger.error(f"{module_name} contains a syntax error:\n{e}")
 
     async def on_error(self, event_method: str, *args: Any, **kwargs: Any) -> None:
         """Log errors using the logging system."""

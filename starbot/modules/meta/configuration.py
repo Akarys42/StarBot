@@ -2,7 +2,7 @@ from io import StringIO
 
 import yaml
 from aiohttp import ClientError
-from disnake import File, Permissions
+from disnake import File, Permissions, TextChannel, Thread
 from disnake.ext.commands import Cog, slash_command
 from sqlalchemy import and_, delete, select
 
@@ -141,7 +141,7 @@ class Configuration(Cog):
             return ["Invalid configuration key."]
 
         match definition["type"]:
-            case "role":
+            case "discord_role":
                 roles = {}
 
                 for role in inter.guild.roles or await inter.guild.fetch_roles():
@@ -151,6 +151,19 @@ class Configuration(Cog):
                     if value.lower() in f"{role.name} ({role.id})".lower():
                         roles[f"{role.name} ({role.id})"] = str(role.id)
                 return roles
+            case "discord_channel":
+                channels = {}
+
+                for channel in inter.guild.channels or await inter.guild.fetch_channels():
+                    if len(channels) >= 25:
+                        break
+
+                    if (
+                        isinstance(channel, (TextChannel, Thread))
+                        and value.lower() in f"#{channel.name} ({channel.id})".lower()
+                    ):
+                        channels[f"#{channel.name} ({channel.id})"] = str(channel.id)
+                return channels
             case "discord_permission":
                 perms = {}
 

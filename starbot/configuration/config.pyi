@@ -20,6 +20,19 @@ class GuildConfig(ConfigABC):
         dm: str
         bypass_permission: disnake.Permissions
 
+    class logging(ConfigABC):
+
+        class channels(ConfigABC):
+            default: int
+            messages: int
+            users: int
+
+        class log(ConfigABC):
+            joins: bool
+            messages: bool
+            server: bool
+            members: bool
+
     class config(ConfigABC):
 
         class perms(ConfigABC):
