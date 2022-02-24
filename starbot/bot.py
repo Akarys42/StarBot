@@ -6,7 +6,7 @@ from typing import Any, Optional
 import arrow
 from aiohttp import ClientSession
 from disnake import AllowedMentions, Game, Intents
-from disnake.ext.commands import Context, Bot
+from disnake.ext.commands import Bot, Context
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import selectinload, sessionmaker
