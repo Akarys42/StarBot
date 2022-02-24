@@ -41,11 +41,11 @@ logging:
       description: "Logging: The default channel to log to"
     messages:
       type: discord_channel
-      default: null
+      default: REF logging.channels.default
       description: "Logging: The channel to log messages to"
-    user:
+    users:
       type: discord_channel
-      default: REF logging.default_channel
+      default: REF logging.channels.default
       description: "Logging: The channel to log user actions to"
   log:
     joins:
@@ -63,11 +63,11 @@ logging:
     members:
       type: bool
       default: "true"
-      description: "Logging: Whether to log when members are modified"
+      description: "Logging: Whether to log when server members are updated"
 
 config:
   perms:
-    discord_role:
+    role:
       type: discord_role
       default: null
       description: "Config: discord_role required to change the configuration"

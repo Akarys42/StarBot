@@ -25,7 +25,7 @@ class GuildConfig(ConfigABC):
         class channels(ConfigABC):
             default: int
             messages: int
-            user: int
+            users: int
 
         class log(ConfigABC):
             joins: bool
@@ -36,7 +36,7 @@ class GuildConfig(ConfigABC):
     class config(ConfigABC):
 
         class perms(ConfigABC):
-            discord_role: int
+            role: int
             discord: disnake.Permissions
 
     class colors(ConfigABC):
