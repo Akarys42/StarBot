@@ -6,7 +6,7 @@ from typing import Any, Optional
 import arrow
 from aiohttp import ClientSession
 from disnake import AllowedMentions, Game, Intents
-from disnake.ext.commands import Context, InteractionBot
+from disnake.ext.commands import Context, Bot
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import selectinload, sessionmaker
@@ -19,7 +19,7 @@ from starbot.models.guild import GuildModel
 logger = logging.getLogger(__name__)
 
 
-class StarBot(InteractionBot):
+class StarBot(Bot):
     """Our main bot class."""
 
     def __init__(self, *args, **kwargs) -> None:
