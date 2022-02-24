@@ -107,6 +107,9 @@ class Logging(Cog):
             logger.debug(f"Could not find channel {channel_id}. Dropping logging event.")
             return
 
+        if user.id == getattr(self.bot.user, "id", None):
+            return
+
         embed = Embed(title=title, color=color, timestamp=datetime.now())
 
         # Add the description if provided
@@ -193,7 +196,7 @@ class Logging(Cog):
                     f"(`{payload.cached_message.channel}`, "
                     f"`{payload.cached_message.channel.id}`)"
                 ),
-                sent_at=f"Sent {self._format_timestamp(payload.cached_message.created_at)}",
+                sent_at=f"Sent {_format_timestamp(payload.cached_message.created_at)}",
                 message_id=(
                     f"[`{payload.message_id}`]"
                     f"({MESSAGE_LINK % (payload.guild_id, payload.channel_id, payload.message_id)})"
