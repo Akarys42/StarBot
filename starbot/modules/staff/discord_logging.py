@@ -148,7 +148,7 @@ class Logging(Cog):
                 title="User joined",
                 color=config.colors.success,
                 user=member,
-                age=f"Created {_format_timestamp(member.created_at)}",
+                created=_format_timestamp(member.created_at),
             )
 
     @Cog.listener("on_member_remove")
@@ -163,14 +163,14 @@ class Logging(Cog):
                 title="User left",
                 color=config.colors.warning,
                 user=member,
-                age=f"Created {_format_timestamp(member.created_at)}",
+                created=_format_timestamp(member.created_at),
                 roles=", ".join(
                     role.mention
                     for role in member.roles
                     if role.id != member.guild.id  # Filter out the everyone role
                 )
                 or "None",  # If no roles, set to None
-                first_joined=f"Joined {_format_timestamp(member.joined_at)}",
+                joined=_format_timestamp(member.joined_at),
             )
 
     @Cog.listener("on_raw_message_delete")
@@ -198,7 +198,7 @@ class Logging(Cog):
                     f"(`{payload.cached_message.channel}`, "
                     f"`{payload.cached_message.channel.id}`)"
                 ),
-                sent_at=f"Sent {_format_timestamp(payload.cached_message.created_at)}",
+                sent=_format_timestamp(payload.cached_message.created_at),
                 message_id=(
                     f"[`{payload.message_id}`]"
                     f"({MESSAGE_LINK % (payload.guild_id, payload.channel_id, payload.message_id)})"
@@ -220,7 +220,7 @@ class Logging(Cog):
                 user=None,  # We don't know who deleted the message
                 description="Message content cannot be displayed",
                 channel=channel_text,
-                sent_at=f"Sent {_format_timestamp(snowflake_time(payload.message_id))}",
+                sent=_format_timestamp(snowflake_time(payload.message_id)),
                 message_id=(
                     f"[`{payload.message_id}`]"
                     f"({MESSAGE_LINK % (payload.guild_id, payload.channel_id, payload.message_id)})"
@@ -276,8 +276,8 @@ class Logging(Cog):
                 f"\n\n**After:**\n{truncate(payload.data['content'], MAX_EDIT_LENGTH)}"
             ),
             channel=channel_text,
-            sent_at=f"Sent {_format_timestamp(snowflake_time(payload.message_id))}",
-            edited_at=f"Edited {_format_timestamp(edited_timestamp)}",
+            sent=_format_timestamp(snowflake_time(payload.message_id)),
+            edited=_format_timestamp(edited_timestamp),
             message_id=(
                 f"[`{payload.message_id}`]"
                 f"({MESSAGE_LINK % (payload.guild_id, payload.channel_id, payload.message_id)})"
@@ -318,6 +318,7 @@ class Logging(Cog):
                 title="Member passed verification",
                 color=config.colors.info,
                 user=before,
+                joined=_format_timestamp(before.joined_at),
             )
 
     @Cog.listener("on_member_update")
