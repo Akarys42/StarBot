@@ -14,6 +14,14 @@ from starbot.constants import ACI
 from starbot.decorators import bypass_guild_configured_check, multi_autocomplete
 from starbot.models import ConfigEntryModel, GuildModel
 
+CONFIGURED_MESSAGE = """
+:white_check_mark: This server has been configured!
+You can now use the `/config` command to adjust the configuration.
+
+We recommend you to set the following entries:
+- `logging.channels.default`: The channel where the bot will log various Discord events.
+""".strip()
+
 
 class Configuration(Cog):
     """A cog for managing the per guild configuration of the bot."""
@@ -188,7 +196,7 @@ class Configuration(Cog):
         """
         Import a configuration from a URL.
 
-        Warning: This will overwrite your current configuration.
+         Warning: This will overwrite your current configuration.
         """
         try:
             async with self.bot.aiohttp.get(url) as resp:
@@ -306,10 +314,7 @@ class Configuration(Cog):
             session.add(guild)
             await session.commit()
 
-        await inter.send(
-            ":white_check_mark: This server has been configured! "
-            "You can now use the `/config` command to adjust the configuration."
-        )
+        await inter.send(CONFIGURED_MESSAGE)
 
 
 def setup(bot: StarBot) -> None:
