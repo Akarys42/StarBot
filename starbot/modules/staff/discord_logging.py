@@ -254,8 +254,14 @@ class Logging(Cog):
 
         if payload.cached_message:
             before = payload.cached_message.content
+
+            if before == payload.data["content"]:
+                return
         else:
             before = "Cannot display previous content"
+
+        if "edited_timestamp" not in payload.data:
+            return
 
         edited_timestamp = datetime.fromisoformat(payload.data["edited_timestamp"])
 
