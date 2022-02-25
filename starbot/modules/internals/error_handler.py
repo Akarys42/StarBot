@@ -5,7 +5,7 @@ from disnake.ext.commands import Cog, CommandError, errors
 
 from starbot.bot import StarBot
 from starbot.constants import ACI
-from starbot.exceptions import GuildNotConfiguredError
+from starbot.exceptions import GuildNotConfiguredError, InDmsError
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +45,8 @@ class ErrorHandler(Cog):
                         ":x: This guild is not configured yet. Please run `/config setup`.",
                         ephemeral=True,
                     )
+            case InDmsError():
+                await inter.send(":x: This bot can only be used in a server.", ephemeral=True)
             # Disnake errors
             case errors.CommandOnCooldown():
                 await self.error_embed(inter, "This command is on cooldown.", ephemeral=True)

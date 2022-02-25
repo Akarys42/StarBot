@@ -13,7 +13,7 @@ from sqlalchemy.orm import selectinload, sessionmaker
 
 from starbot.configuration.config import GuildConfig
 from starbot.constants import ACI, DATABASE_URL, TEST_GUILDS
-from starbot.exceptions import GuildNotConfiguredError
+from starbot.exceptions import GuildNotConfiguredError, InDmsError
 from starbot.models.guild import GuildModel
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,7 @@ class StarBot(InteractionBot):
         self.Session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
         self.aiohttp = ClientSession(loop=self.loop)
 
+        self.add_app_command_check(self._is_in_dms_check, slash_commands=True)
         self.add_app_command_check(self._is_guild_configured_check, slash_commands=True)
 
     async def get_config(
@@ -71,6 +72,12 @@ class StarBot(InteractionBot):
                 )
             ).first() is None:
                 raise GuildNotConfiguredError()
+        return True
+
+    async def _is_in_dms_check(self, ctx_or_inter: Context | ACI) -> bool:
+        """Raises InDmsError if the command is used in DMs."""
+        if ctx_or_inter.guild is None:
+            raise InDmsError()
         return True
 
     def find_extensions(self, module: str = "starbot.modules") -> None:
