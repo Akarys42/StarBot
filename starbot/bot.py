@@ -1,5 +1,6 @@
 import ast
 import logging
+import sys
 from pathlib import Path
 from typing import Any, Optional
 
@@ -101,6 +102,11 @@ class StarBot(InteractionBot):
 
     async def on_error(self, event_method: str, *args: Any, **kwargs: Any) -> None:
         """Log errors using the logging system."""
+        # If the guild isn't configured or it happened in DMs, we don't want to log the error
+        exception = sys.exc_info()[1]
+        if isinstance(exception, (GuildNotConfiguredError, InDmsError)):
+            return
+
         logger.exception(f"Error in {event_method!r}. Args: {args}, kwargs: {kwargs}")
 
     @classmethod
