@@ -107,6 +107,11 @@ class Logging(Cog):
             logger.debug(f"Could not find channel {channel_id}. Dropping logging event.")
             return
 
+        # Do not log if the user in question is the bot
+        if user and user == self.bot.user:
+            logger.debug("Ignoring logging event because it originates from the bot.")
+            return
+
         embed = Embed(title=title, color=color, timestamp=datetime.now())
 
         # Add the description if provided
