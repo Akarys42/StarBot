@@ -27,7 +27,7 @@ class StarBot(InteractionBot):
         super().__init__(*args, **kwargs)
 
         self.start_time = arrow.utcnow()
-        self.all_extensions: list[str] = []
+        self.all_modules: list[str] = []
 
         self.engine = create_async_engine(DATABASE_URL)
         self.Session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
@@ -81,21 +81,21 @@ class StarBot(InteractionBot):
             raise InDmsError()
         return True
 
-    def find_extensions(self, module: str = "starbot.modules") -> None:
-        """Find and load all extensions."""
+    def load_all_modules(self, module: str = "starbot.modules") -> None:
+        """Find and load all modules."""
         for file in Path(module.replace(".", "/")).iterdir():
             if file.is_dir():
-                self.find_extensions(f"{module}.{file.name}")
+                self.load_all_modules(f"{module}.{file.name}")
             elif file.is_file() and file.name.endswith(".py") and not file.name.startswith("_"):
-                # Check if this actually contain an extension, meaning it has a setup function
+                # Check if this actually contain a module, meaning it has a setup function
                 module_name = f"{module}.{file.stem}"
 
                 try:
                     tree = ast.parse(file.read_text())
 
                     if any(f.name == "setup" for f in tree.body if isinstance(f, ast.FunctionDef)):
-                        logger.info(f"Loading extension {module_name}")
-                        self.all_extensions.append(module_name)
+                        logger.info(f"Loading module {module_name}")
+                        self.all_modules.append(module_name)
                         self.load_extension(module_name)
                 except SyntaxError as e:
                     logger.error(f"{module_name} contains a syntax error:\n{e}")

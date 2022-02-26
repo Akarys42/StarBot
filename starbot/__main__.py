@@ -17,7 +17,7 @@ def main() -> None:
     bot = StarBot.new()
 
     logging.info("Loading extensions")
-    bot.find_extensions()
+    bot.load_all_modules()
 
     logging.info(f"Starting bot, build {GIT_SHA}")
     bot.run(TOKEN)
