@@ -237,7 +237,7 @@ class Logging(Cog):
 
         config = await self.bot.get_config(guild_id=payload.guild_id)
 
-        if not config.logging.channels.messages or not config.logging.log.messages:
+        if not config.logging.channels.messages:
             return
 
         guild = self.bot.get_guild(payload.guild_id)
