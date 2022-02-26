@@ -38,32 +38,23 @@ logging:
     default:
       type: discord_channel
       default: null
-      description: "Logging: The default channel to log to"
+      description: "Logging: Where all the logs will be sent, unless a specific channel is set"
     messages:
       type: discord_channel
       default: REF logging.channels.default
-      description: "Logging: The channel to log messages to"
-    users:
-      type: discord_channel
-      default: REF logging.channels.default
-      description: "Logging: The channel to log user actions to"
-  log:
-    joins:
-      type: bool
-      default: "true"
-      description: "Logging: Whether to log when a user joins or leaves"
-    messages:
-      type: bool
-      default: "true"
-      description: "Logging: Whether to log when a message is edited or deleted"
-    server:
-      type: bool
-      default: "true"
-      description: "Logging: Whether to log when changes are made to the server"
+      description: "Logging: Where to log message edits and deletions"
     members:
-      type: bool
-      default: "true"
-      description: "Logging: Whether to log when server members are updated"
+      type: discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Where to log updates done to the members"
+    joins:
+      type: discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Where to log when members join or leave the server"
+    server:
+      type: discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Where to log when the server is updated"
 
 config:
   perms:

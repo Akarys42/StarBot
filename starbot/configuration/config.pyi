@@ -25,13 +25,9 @@ class GuildConfig(ConfigABC):
         class channels(ConfigABC):
             default: int
             messages: int
-            users: int
-
-        class log(ConfigABC):
-            joins: bool
-            messages: bool
-            server: bool
-            members: bool
+            members: int
+            joins: int
+            server: int
 
     class config(ConfigABC):
 

@@ -92,10 +92,10 @@ class Logging(Cog):
         channel_id: int,
         title: str,
         color: int,
-        user: Optional[User] = None,
+        user: Optional[User | Member] = None,
         description: Optional[str] = None,
         extra_inline: bool = False,
-        **extras: dict[str, str],
+        **extras: str,
     ) -> None:
         """Send a message to the logging channel."""
         # Fetch the log channel from the server
@@ -141,10 +141,10 @@ class Logging(Cog):
         """Log new members of the server."""
         config = await self.bot.get_config(guild_id=member.guild.id)
 
-        if config.logging.channels.users and config.logging.log.joins:
+        if config.logging.channels.joins:
             await self.send_log_message(
                 guild_id=member.guild.id,
-                channel_id=config.logging.channels.users,
+                channel_id=config.logging.channels.joins,
                 title="User joined",
                 color=config.colors.success,
                 user=member,
@@ -156,10 +156,10 @@ class Logging(Cog):
         """Log members leaving the server."""
         config = await self.bot.get_config(guild_id=member.guild.id)
 
-        if config.logging.channels.users and config.logging.log.joins:
+        if config.logging.channels.joins:
             await self.send_log_message(
                 guild_id=member.guild.id,
-                channel_id=config.logging.channels.users,
+                channel_id=config.logging.channels.joins,
                 title="User left",
                 color=config.colors.warning,
                 user=member,
@@ -178,7 +178,7 @@ class Logging(Cog):
         """Log deleted messages."""
         config = await self.bot.get_config(guild_id=payload.guild_id)
 
-        if not config.logging.channels.messages or not config.logging.log.messages:
+        if not config.logging.channels.messages:
             return
 
         if payload.channel_id == config.logging.channels.messages:
@@ -292,10 +292,10 @@ class Logging(Cog):
 
         config = await self.bot.get_config(guild_id=before.guild.id)
 
-        if config.logging.channels.users and config.logging.log.members:
+        if config.logging.channels.members:
             await self.send_log_message(
                 guild_id=before.guild.id,
-                channel_id=config.logging.channels.users,
+                channel_id=config.logging.channels.members,
                 title="Nickname changed",
                 color=config.colors.info,
                 user=before,
@@ -311,10 +311,10 @@ class Logging(Cog):
 
         config = await self.bot.get_config(guild_id=before.guild.id)
 
-        if config.logging.channels.users and config.logging.log.joins:
+        if config.logging.channels.joins:
             await self.send_log_message(
                 guild_id=before.guild.id,
-                channel_id=config.logging.channels.users,
+                channel_id=config.logging.channels.joins,
                 title="Member passed verification",
                 color=config.colors.info,
                 user=before,
@@ -329,7 +329,7 @@ class Logging(Cog):
 
         config = await self.bot.get_config(guild_id=before.guild.id)
 
-        if config.logging.channels.users and config.logging.log.members:
+        if config.logging.channels.members:
             fields = {}
 
             removed_roles = set(before.roles) - set(after.roles)
@@ -344,19 +344,47 @@ class Logging(Cog):
             if len(fields) > 0:
                 await self.send_log_message(
                     guild_id=before.guild.id,
-                    channel_id=config.logging.channels.users,
+                    channel_id=config.logging.channels.members,
                     title="Member roles updated",
                     color=config.colors.info,
                     user=before,
                     **fields,
                 )
 
+    @Cog.listener("on_member_ban")
+    async def log_banned_member(self, guild: Guild, user: User) -> None:
+        """Log users getting banned."""
+        config = await self.bot.get_config(guild_id=guild.id)
+
+        if config.logging.channels.members:
+            await self.send_log_message(
+                guild_id=guild.id,
+                channel_id=config.logging.channels.members,
+                title="User banned",
+                color=config.colors.danger,
+                user=user,
+            )
+
+    @Cog.listener("on_member_unban")
+    async def log_unbanned_member(self, guild: Guild, user: User) -> None:
+        """Log users getting unbanned."""
+        config = await self.bot.get_config(guild_id=guild.id)
+
+        if config.logging.channels.members:
+            await self.send_log_message(
+                guild_id=guild.id,
+                channel_id=config.logging.channels.members,
+                title="User unbanned",
+                color=config.colors.success,
+                user=user,
+            )
+
     @Cog.listener("on_guild_channel_create")
     async def log_new_channels(self, channel: GuildChannel) -> None:
         """Log the creation of a new channel."""
         config = await self.bot.get_config(guild_id=channel.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             if human_readable_name := _get_human_readable_channel_type(channel):
                 title = f"{human_readable_name.title()} Channel Created"
             else:
@@ -364,7 +392,7 @@ class Logging(Cog):
 
             await self.send_log_message(
                 guild_id=channel.guild.id,
-                channel_id=config.logging.channels.default,
+                channel_id=config.logging.channels.server,
                 title=title,
                 color=config.colors.success,
                 user=None,
@@ -376,7 +404,7 @@ class Logging(Cog):
         """Log the deletion of a channel."""
         config = await self.bot.get_config(guild_id=channel.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             if human_readable_name := _get_human_readable_channel_type(channel):
                 title = f"{human_readable_name.title()} Channel Deleted"
             else:
@@ -384,7 +412,7 @@ class Logging(Cog):
 
             await self.send_log_message(
                 guild_id=channel.guild.id,
-                channel_id=config.logging.channels.default,
+                channel_id=config.logging.channels.server,
                 title=title,
                 color=config.colors.danger,
                 user=None,
@@ -407,7 +435,7 @@ class Logging(Cog):
         """
         config = await self.bot.get_config(guild_id=before.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             if human_readable_name := _get_human_readable_channel_type(before):
                 title = f"{human_readable_name.title()} channel updated"
             else:
@@ -453,7 +481,7 @@ class Logging(Cog):
             if len(fields) > 0:
                 await self.send_log_message(
                     guild_id=before.guild.id,
-                    channel_id=config.logging.channels.default,
+                    channel_id=config.logging.channels.server,
                     title=title,
                     color=config.colors.info,
                     user=None,
@@ -474,10 +502,10 @@ class Logging(Cog):
 
         config = await self.bot.get_config(guild_id=thread.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             await self.send_log_message(
                 guild_id=thread.guild.id,
-                channel_id=config.logging.channels.default,
+                channel_id=config.logging.channels.server,
                 title="Thread created",
                 color=config.colors.success,
                 user=None,
@@ -490,10 +518,10 @@ class Logging(Cog):
         """Log the deletion of threads."""
         config = await self.bot.get_config(guild_id=thread.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             await self.send_log_message(
                 guild_id=thread.guild.id,
-                channel_id=config.logging.channels.default,
+                channel_id=config.logging.channels.server,
                 title="Thread deleted",
                 color=config.colors.danger,
                 user=None,
@@ -514,7 +542,7 @@ class Logging(Cog):
         """
         config = await self.bot.get_config(guild_id=before.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             fields = {}
             field_names = ["name", "slowmode_delay", "archived", "locked"]
 
@@ -529,7 +557,7 @@ class Logging(Cog):
             if len(fields) > 0:
                 await self.send_log_message(
                     guild_id=before.guild.id,
-                    channel_id=config.logging.channels.default,
+                    channel_id=config.logging.channels.server,
                     title="Thread updated",
                     color=config.colors.info,
                     user=None,
@@ -563,7 +591,7 @@ class Logging(Cog):
         """
         config = await self.bot.get_config(guild_id=before.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             fields = {}
 
             for field in GUILD_FIELDS:
@@ -575,7 +603,7 @@ class Logging(Cog):
             if len(fields) > 0:
                 await self.send_log_message(
                     guild_id=before.id,
-                    channel_id=config.logging.channels.default,
+                    channel_id=config.logging.channels.server,
                     title="Guild updated",
                     color=config.colors.info,
                     user=None,
@@ -587,10 +615,10 @@ class Logging(Cog):
         """Log the creation of a new role."""
         config = await self.bot.get_config(guild_id=role.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             await self.send_log_message(
                 guild_id=role.guild.id,
-                channel_id=config.logging.channels.default,
+                channel_id=config.logging.channels.server,
                 title="Role created",
                 color=config.colors.success,
                 user=None,
@@ -602,10 +630,10 @@ class Logging(Cog):
         """Log the deletion of roles."""
         config = await self.bot.get_config(guild_id=role.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             await self.send_log_message(
                 guild_id=role.guild.id,
-                channel_id=config.logging.channels.default,
+                channel_id=config.logging.channels.server,
                 title="Role deleted",
                 color=config.colors.danger,
                 user=None,
@@ -627,7 +655,7 @@ class Logging(Cog):
         """
         config = await self.bot.get_config(guild_id=before.guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             fields = {}
 
             for field_name in ("name", "hoist", "mentionable", "position"):
@@ -670,7 +698,7 @@ class Logging(Cog):
             if len(fields) > 0:
                 await self.send_log_message(
                     guild_id=before.guild.id,
-                    channel_id=config.logging.channels.default,
+                    channel_id=config.logging.channels.server,
                     title="Role updated",
                     color=config.colors.info,
                     user=None,
@@ -689,7 +717,7 @@ class Logging(Cog):
         """
         config = await self.bot.get_config(guild_id=guild.id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             fields = {}
 
             added_emojis = set(after) - set(before)
@@ -723,7 +751,7 @@ class Logging(Cog):
             if len(fields) > 0:
                 await self.send_log_message(
                     guild_id=guild.id,
-                    channel_id=config.logging.channels.default,
+                    channel_id=config.logging.channels.server,
                     title="Emojis updated",
                     color=config.colors.info,
                     user=None,
@@ -735,10 +763,10 @@ class Logging(Cog):
         """Log the creation of scheduled events."""
         config = await self.bot.get_config(guild_id=event.guild_id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             await self.send_log_message(
                 guild_id=event.guild_id,
-                channel_id=config.logging.channels.default,
+                channel_id=config.logging.channels.server,
                 title="Scheduled event created",
                 color=config.colors.success,
                 user=None,
@@ -749,7 +777,7 @@ class Logging(Cog):
                 if event.scheduled_end_time
                 else None,
                 channel=f"{event.channel.mention} (`{event.channel}`, `{event.channel.id}`)",
-                id=event.id,
+                id=str(event.id),
             )
 
     @Cog.listener("on_guild_scheduled_event_delete")
@@ -757,10 +785,10 @@ class Logging(Cog):
         """Log the deletion of scheduled events."""
         config = await self.bot.get_config(guild_id=event.guild_id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             await self.send_log_message(
                 guild_id=event.guild_id,
-                channel_id=config.logging.channels.default,
+                channel_id=config.logging.channels.server,
                 title="Scheduled event deleted",
                 color=config.colors.danger,
                 user=None,
@@ -771,7 +799,7 @@ class Logging(Cog):
                 if event.scheduled_end_time
                 else None,
                 channel=f"{event.channel.mention} (`{event.channel}`, `{event.channel.id}`)",
-                id=event.id,
+                id=str(event.id),
             )
 
     @Cog.listener("on_guild_scheduled_event_update")
@@ -781,7 +809,7 @@ class Logging(Cog):
         """Log the updates of scheduled events."""
         config = await self.bot.get_config(guild_id=before.guild_id)
 
-        if config.logging.channels.default and config.logging.log.server:
+        if config.logging.channels.server:
             fields = {}
 
             for field in ("name", "description", "channel"):
@@ -805,42 +833,14 @@ class Logging(Cog):
             if len(fields) > 0:
                 await self.send_log_message(
                     guild_id=before.guild_id,
-                    channel_id=config.logging.channels.default,
+                    channel_id=config.logging.channels.server,
                     title="Scheduled event updated",
                     color=config.colors.info,
                     user=None,
                     event=after.name,
                     **fields,
-                    id=after.id,
+                    id=str(after.id),
                 )
-
-    @Cog.listener("on_member_ban")
-    async def log_banned_member(self, guild: Guild, user: User) -> None:
-        """Log users getting banned."""
-        config = await self.bot.get_config(guild_id=guild.id)
-
-        if config.logging.channels.users and config.logging.log.members:
-            await self.send_log_message(
-                guild_id=guild.id,
-                channel_id=config.logging.channels.users,
-                title="User banned",
-                color=config.colors.danger,
-                user=user,
-            )
-
-    @Cog.listener("on_member_unban")
-    async def log_unbanned_member(self, guild: Guild, user: User) -> None:
-        """Log users getting unbanned."""
-        config = await self.bot.get_config(guild_id=guild.id)
-
-        if config.logging.channels.users and config.logging.log.members:
-            await self.send_log_message(
-                guild_id=guild.id,
-                channel_id=config.logging.channels.users,
-                title="User unbanned",
-                color=config.colors.success,
-                user=user,
-            )
 
 
 def setup(bot: StarBot) -> None:
