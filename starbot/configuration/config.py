@@ -47,13 +47,17 @@ class GuildConfig(ConfigABC):
 
     def convert_entry(self, value: Any, definition: dict) -> Any:
         """Convert the string value to the correct type."""
-        if value is None:
+        value = str(value).strip()
+
+        if value.lower() in ("none", "null"):
             return None
 
-        if isinstance(value, str) and value.startswith("REF"):
+        if value.startswith("REF"):
             return self.get(value.removeprefix("REF "))
 
-        match definition["type"]:
+        type_ = definition["type"].removeprefix("optional:")
+
+        match type_:
             case "int":
                 return int(value, base=0)
             case "bool":

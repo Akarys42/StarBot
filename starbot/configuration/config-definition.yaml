@@ -8,7 +8,7 @@ bot:
 phishing:
   should_filter:
     type: bool
-    default: "true"
+    default: true
     description: "Phishing: Whether to filter out phishing links"
   action:
     type: choice
@@ -36,34 +36,34 @@ phishing:
 logging:
   channels:
     default:
-      type: discord_channel
+      type: optional:discord_channel
       default: null
       description: "Logging: Where all the logs will be sent, unless a specific channel is set"
     messages:
-      type: discord_channel
+      type: optional:discord_channel
       default: REF logging.channels.default
       description: "Logging: Where to log message edits and deletions"
     members:
-      type: discord_channel
+      type: optional:discord_channel
       default: REF logging.channels.default
       description: "Logging: Where to log updates done to the members"
     joins:
-      type: discord_channel
+      type: optional:discord_channel
       default: REF logging.channels.default
       description: "Logging: Where to log when members join or leave the server"
     server:
-      type: discord_channel
+      type: optional:discord_channel
       default: REF logging.channels.default
       description: "Logging: Where to log when the server is updated"
 
 config:
   perms:
     role:
-      type: discord_role
+      type: optional:discord_role
       default: null
-      description: "Config: discord_role required to change the configuration"
+      description: "Config: Role required to change the configuration"
     discord:
-      type: discord_permission
+      type: optional:discord_permission
       default: administrator
       description: "Config: Discord permission required to change the configuration"
 

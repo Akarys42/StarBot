@@ -148,22 +148,27 @@ class Configuration(Cog):
         if not (definition := get_dotted_path(DEFINITION, key)):
             return ["Invalid configuration key."]
 
-        match definition["type"]:
+        type_ = definition["type"]
+
+        optional = type_.startswith("optional:")
+        type_ = type_.removeprefix("optional:")
+
+        match type_:
             case "discord_role":
                 roles = {}
 
                 for role in inter.guild.roles or await inter.guild.fetch_roles():
-                    if len(roles) >= 25:
+                    if len(roles) >= 24:
                         break
 
                     if value.lower() in f"{role.name} ({role.id})".lower():
                         roles[f"{role.name} ({role.id})"] = str(role.id)
-                return roles
+                completion = roles
             case "discord_channel":
                 channels = {}
 
                 for channel in inter.guild.channels or await inter.guild.fetch_channels():
-                    if len(channels) >= 25:
+                    if len(channels) >= 24:
                         break
 
                     if (
@@ -171,24 +176,35 @@ class Configuration(Cog):
                         and value.lower() in f"#{channel.name} ({channel.id})".lower()
                     ):
                         channels[f"#{channel.name} ({channel.id})"] = str(channel.id)
-                return channels
+                completion = channels
             case "discord_permission":
                 perms = {}
 
                 for name, _ in Permissions():
-                    if len(perms) >= 25:
+                    if len(perms) >= 24:
                         break
 
                     if value.lower().replace(" ", "_") in name:
                         perms[name.replace("_", " ").capitalize()] = name
 
-                return perms
+                completion = perms
             case "bool":
-                return ["True", "False"]
+                completion = ["True", "False"]
             case "choice":
-                return [choice for choice in definition["choices"] if value in choice][:25]
+                completion = [choice for choice in definition["choices"] if value in choice][:24]
             case _:
-                return [value or " "]  # Need to return something else than an empty string
+                completion = [
+                    value or "Start typing"
+                ]  # Need to return something else than an empty string
+
+        if optional:
+            if isinstance(completion, dict):
+                # We make sure none is the first value
+                completion = {"None": "None", **completion}
+            elif isinstance(completion, list):
+                completion.insert(0, "None")
+
+        return completion
 
     @require_permission(role_id="config.perms.role", permissions="config.perms.discord")
     @config.sub_command("import")
