@@ -39,7 +39,7 @@ class Configuration(Cog):
 
             assert isinstance(value, dict)
             if "type" in value:
-                self.autocomplete_fields[f"{value['description']} ({new_path})"] = new_path
+                self.autocomplete_fields[f"{value['description']}"] = new_path
             else:
                 self._populate_autocomplete_fields(new_path)
 

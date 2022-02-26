@@ -165,7 +165,7 @@ class Logging(Cog):
                 user=member,
                 created=_format_timestamp(member.created_at),
                 roles=", ".join(
-                    role.mention
+                    f"{role.mention} (`{role}`, `{role.id}`)"
                     for role in member.roles
                     if role.id != member.guild.id  # Filter out the everyone role
                 )
@@ -336,10 +336,14 @@ class Logging(Cog):
             added_roles = set(after.roles) - set(before.roles)
 
             if removed_roles:
-                fields["roles_removed"] = ", ".join(role.mention for role in removed_roles)
+                fields["roles_removed"] = ", ".join(
+                    f"{role.mention} (`{role}`, `{role.id}`)" for role in removed_roles
+                )
 
             if added_roles:
-                fields["roles_added"] = ", ".join(role.mention for role in added_roles)
+                fields["roles_added"] = ", ".join(
+                    f"{role.mention} (`{role}`, `{role.id}`)" for role in added_roles
+                )
 
             if len(fields) > 0:
                 await self.send_log_message(
@@ -638,6 +642,8 @@ class Logging(Cog):
                 color=config.colors.danger,
                 user=None,
                 description=f"`{role}` (`{role.id}`)",
+                role_color=hex(role.color.value) if role.color.value != 0 else None,
+                position=str(role.position),
             )
 
     @Cog.listener("on_guild_role_update")
