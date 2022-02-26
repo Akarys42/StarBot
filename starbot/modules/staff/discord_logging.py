@@ -174,7 +174,7 @@ class Logging(Cog):
             )
 
     @Cog.listener("on_raw_message_delete")
-    async def log_deleted_messages(self, payload: RawMessageDeleteEvent) -> None:
+    async def log_message_deletes(self, payload: RawMessageDeleteEvent) -> None:
         """Log deleted messages."""
         config = await self.bot.get_config(guild_id=payload.guild_id)
 
@@ -198,6 +198,7 @@ class Logging(Cog):
                     f"(`{payload.cached_message.channel}`, "
                     f"`{payload.cached_message.channel.id}`)"
                 ),
+                attachments=str(len(payload.cached_message.attachments)),
                 sent=_format_timestamp(payload.cached_message.created_at),
                 message_id=(
                     f"[`{payload.message_id}`]"
@@ -228,7 +229,7 @@ class Logging(Cog):
             )
 
     @Cog.listener("on_raw_message_edit")
-    async def log_edited_messages(self, payload: RawMessageUpdateEvent) -> None:
+    async def log_message_edits(self, payload: RawMessageUpdateEvent) -> None:
         """Log edited messages."""
         logger.debug(f"Message edit received: {payload.data}")
 
