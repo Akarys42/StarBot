@@ -17,12 +17,6 @@ class GuildConfig(ConfigABC):
     class bot(ConfigABC):
         description: str
 
-    class phishing(ConfigABC):
-        should_filter: bool
-        action: str
-        dm: str
-        bypass_permission: disnake.Permissions
-
     class logging(ConfigABC):
 
         class channels(ConfigABC):
@@ -32,11 +26,23 @@ class GuildConfig(ConfigABC):
             joins: Optional[int]
             server: Optional[int]
 
+    class moderation(ConfigABC):
+
+        class perms(ConfigABC):
+            role: Optional[int]
+            discord: Optional[disnake.Permissions]
+
     class config(ConfigABC):
 
         class perms(ConfigABC):
             role: Optional[int]
             discord: Optional[disnake.Permissions]
+
+    class phishing(ConfigABC):
+        should_filter: bool
+        action: str
+        dm: str
+        bypass_permission: disnake.Permissions
 
     class colors(ConfigABC):
         danger: int

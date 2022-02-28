@@ -9,6 +9,7 @@ from disnake.ext.commands import Cog, slash_command
 from sqlalchemy import and_, select, update
 
 from starbot.bot import StarBot
+from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.converters import autocomplete_relativedelta, convert_relativedelta
 from starbot.models.infraction import InfractionModel, InfractionTypes
@@ -204,16 +205,19 @@ class InfractCog(Cog):
                 ephemeral=type_ in HIDDEN_INFRACTIONS,
             )
 
+    @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
     async def note(self, inter: ACI, user: User, message: str) -> None:
         """Put a moderator-only note on a user."""
         await self.infract(inter, InfractionTypes.NOTE, user, inter.author, message)
 
+    @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
     async def warn(self, inter: ACI, user: User, reason: str) -> None:
         """Warn a user."""
         await self.infract(inter, InfractionTypes.WARNING, user, inter.author, reason)
 
+    @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
     async def mute(
         self, inter: ACI, user: User, duration: str, reason: Optional[str] = None
@@ -224,21 +228,25 @@ class InfractCog(Cog):
 
     mute.autocomplete("duration")(autocomplete_relativedelta)
 
+    @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
     async def kick(self, inter: ACI, user: User, reason: Optional[str] = None) -> None:
         """Kick a user."""
         await self.infract(inter, InfractionTypes.KICK, user, inter.author, reason)
 
+    @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
     async def ban(self, inter: ACI, user: User, reason: Optional[str] = None) -> None:
         """Ban a user."""
         await self.infract(inter, InfractionTypes.BAN, user, inter.author, reason)
 
+    @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
     async def unmute(self, inter: ACI, user: User) -> None:
         """Unmute a user."""
         await self.cancel_infraction(inter, user, inter.author, InfractionTypes.MUTE)
 
+    @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
     async def unban(self, inter: ACI, user: User) -> None:
         """Unban a user."""
