@@ -1,10 +1,27 @@
-# Types supported by arrow.get
 import datetime
+import re
 from enum import Enum
 from time import struct_time
-from typing import Union
+from typing import Optional, Union
 
 import arrow
+
+# Types supported by arrow.get
+from dateutil.relativedelta import relativedelta
+
+# Part of the code in this file is based on the code from python-discord/bot
+# See their license in the LICENSE-THIRD-PARTY file.
+
+
+DURATION_REGEX = re.compile(
+    r"((?P<years>\d+?) ?(years|year|Y|y) ?)?"
+    r"((?P<months>\d+?) ?(months|month) ?)?"
+    r"((?P<weeks>\d+?) ?(weeks|week) ?)?"
+    r"((?P<days>\d+?) ?(days|day|D|d) ?)?"
+    r"((?P<hours>\d+?) ?(hours|hour|H|h) ?)?"
+    r"((?P<minutes>\d+?) ?(minutes|minute|M|m) ?)?"
+    r"((?P<seconds>\d+?) ?(seconds|second|S|s))?"
+)
 
 Timestamp = Union[
     arrow.Arrow,
@@ -44,3 +61,32 @@ def discord_timestamp(
     """
     timestamp = int(arrow.get(timestamp).timestamp())
     return f"<t:{timestamp}:{format_.value}>"
+
+
+def parse_duration(duration: str) -> Optional[relativedelta]:
+    """Try to parse a text duration."""
+    if not (match := DURATION_REGEX.match(duration)):
+        return None
+
+    content = {key: int(value) for key, value in match.groupdict().items() if value}
+
+    return relativedelta(**content)
+
+
+def humanized_delta(delta: relativedelta) -> str:
+    """Return a human-readable string representation of a relativedelta."""
+    units = (
+        ("year", delta.years),
+        ("month", delta.months),
+        ("day", delta.days),
+        ("hour", delta.hours),
+        ("minute", delta.minutes),
+        ("second", delta.seconds),
+    )
+    parts = []
+
+    for unit, value in units:
+        if value:
+            parts.append(f"{value} {unit}{'s' if value > 1 else ''}")
+
+    return parts[0] if len(parts) == 1 else f"{', '.join(parts[:-1])} and {parts[-1]}"

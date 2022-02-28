@@ -1,9 +1,67 @@
 bot:
+  info_channel:
+    type: optional:discord_channel
+    default: null
+    description: "Bot: Channel where important updates will be posted."
   description:
     type: str
     default: |
       ${display_name} is a general purpose bot aiming to provide the essential functionalities needed to run your community, while being an open-source alternative to larger bots.
     description: "Bot: The description of the bot"
+
+logging:
+  channels:
+    default:
+      type: optional:discord_channel
+      default: null
+      description: "Logging: Channel where all the logs will be sent, unless a specific channel is set"
+    moderation:
+      type: optional:discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Channel where moderation actions will be logged"
+    messages:
+      type: optional:discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Channel where to log message edits and deletions"
+    members:
+      type: optional:discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Channel where to log updates done to the members"
+    joins:
+      type: optional:discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Channel where to log when members join or leave the server"
+    server:
+      type: optional:discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Channel where to log when the server is updated"
+
+moderation:
+  perms:
+    role:
+      type: optional:discord_role
+      default: null
+      description: "Moderation: Role required to use the moderation commands"
+    discord:
+      type: optional:discord_permission
+      default: ban_members
+      description: "Moderation: Discord permission required to use the moderation commands"
+  messages:
+    dm_description:
+      type: optional:str
+      default: null
+      description: "Moderation: Embed message sent to the user. Can link to the rules or how to appeal, for example."
+
+config:
+  perms:
+    role:
+      type: optional:discord_role
+      default: null
+      description: "Config: Role required to change the configuration"
+    discord:
+      type: optional:discord_permission
+      default: administrator
+      description: "Config: Discord permission required to change the configuration"
 
 phishing:
   should_filter:
@@ -32,40 +90,6 @@ phishing:
     type: discord_permission
     default: manage_messages
     description: "Phishing: The permission required to bypass the filter"
-
-logging:
-  channels:
-    default:
-      type: optional:discord_channel
-      default: null
-      description: "Logging: Where all the logs will be sent, unless a specific channel is set"
-    messages:
-      type: optional:discord_channel
-      default: REF logging.channels.default
-      description: "Logging: Where to log message edits and deletions"
-    members:
-      type: optional:discord_channel
-      default: REF logging.channels.default
-      description: "Logging: Where to log updates done to the members"
-    joins:
-      type: optional:discord_channel
-      default: REF logging.channels.default
-      description: "Logging: Where to log when members join or leave the server"
-    server:
-      type: optional:discord_channel
-      default: REF logging.channels.default
-      description: "Logging: Where to log when the server is updated"
-
-config:
-  perms:
-    role:
-      type: optional:discord_role
-      default: null
-      description: "Config: Role required to change the configuration"
-    discord:
-      type: optional:discord_permission
-      default: administrator
-      description: "Config: Discord permission required to change the configuration"
 
 colors:
   danger:

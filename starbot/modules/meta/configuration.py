@@ -19,7 +19,10 @@ CONFIGURED_MESSAGE = """
 You can now use the `/config` command to adjust the configuration.
 
 We recommend you to set the following entries:
+- `bot.info_channel`: The channel where the bot will post important updates.
 - `logging.channels.default`: The channel where the bot will log various Discord events.
+- `logging.channels.moderation`: The channel where the bot will log moderation actions. \
+Same as `logging.channels.default` if not set.
 """.strip()
 
 
@@ -153,6 +156,8 @@ class Configuration(Cog):
         optional = type_.startswith("optional:")
         type_ = type_.removeprefix("optional:")
 
+        special_value = True
+
         match type_:
             case "discord_role":
                 roles = {}
@@ -193,16 +198,23 @@ class Configuration(Cog):
             case "choice":
                 completion = [choice for choice in definition["choices"] if value in choice][:24]
             case _:
+                special_value = False
                 completion = [
                     value or "Start typing"
                 ]  # Need to return something else than an empty string
 
         if optional:
+            # We make sure none is the first value, if we have anything special
             if isinstance(completion, dict):
-                # We make sure none is the first value
-                completion = {"None": "None", **completion}
+                if special_value:
+                    completion = {"None": "None", **completion}
+                else:
+                    completion["None"] = "None"
             elif isinstance(completion, list):
-                completion.insert(0, "None")
+                if special_value:
+                    completion.insert(0, "None")
+                else:
+                    completion.append("None")
 
         return completion
 
