@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+from http.client import HTTPException
 from typing import Optional
 
 import arrow
@@ -13,9 +14,9 @@ from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.converters import autocomplete_relativedelta, convert_relativedelta
 from starbot.models.infraction import InfractionModel, InfractionTypes
-from starbot.modules.staff.discord_logging import Logging
+from starbot.modules.staff.discord_logging import Logging, format_timestamp
 from starbot.utils.lock import argument_lock
-from starbot.utils.time import discord_timestamp, humanized_delta
+from starbot.utils.time import TimestampFormats, discord_timestamp, humanized_delta
 
 INFRACTIONS_WITH_DURATIONS = {InfractionTypes.MUTE}
 HIDDEN_INFRACTIONS = {InfractionTypes.NOTE}
@@ -28,6 +29,10 @@ INFRACTION_NAME = {
     InfractionTypes.KICK: "kick",
     InfractionTypes.BAN: "ban",
 }
+
+EMOJI_APPLIED = "\N{HAMMER}"
+EMOJI_CANCELLED = "\N{HAMMER AND WRENCH}"
+EMOJI_DM_SUCCESS = "\N{ENVELOPE WITH DOWNWARDS ARROW ABOVE}"
 
 # Limitation due to the Discord API
 MAX_TIMEOUT_DURATION = timedelta(days=28)
@@ -52,6 +57,8 @@ class Infract(Cog):
         duration: Optional[relativedelta] = None,
     ) -> None:
         """Infract a user."""
+        config = await self.bot.get_config(inter)
+
         async with self.bot.Session() as session:
             # Make sure the duration is set appropriately
             if duration is not None and type_ not in INFRACTIONS_WITH_DURATIONS:
@@ -90,6 +97,47 @@ class Infract(Cog):
             if duration is not None:
                 now = arrow.utcnow()
                 duration = now + duration - now
+
+            if type_ not in HIDDEN_INFRACTIONS:
+                # We try to check early if the bot should be able to apply the infraction or not
+                # so we don't send a DM if it can't be applied
+                can_continue = True
+
+                match type_:
+                    case InfractionTypes.MUTE:
+                        can_continue = inter.guild.me.guild_permissions.moderate_members
+                    case InfractionTypes.KICK:
+                        can_continue = inter.guild.me.guild_permissions.kick_members
+                    case InfractionTypes.BAN:
+                        can_continue = inter.guild.me.guild_permissions.ban_members
+
+                if not can_continue:
+                    await inter.send(
+                        ":x: The bot doesn't have the permission to apply this infraction.",
+                        ephemeral=True,
+                    )
+                    return
+
+                # Send a DM to the user
+                message = f"**You have received a {INFRACTION_NAME[type_]} in {inter.guild.name}**"
+                if reason:
+                    message += f" for the following reason: {reason}"
+
+                if duration:
+                    message += "\n\nThis infraction will expire " + discord_timestamp(
+                        datetime.utcnow() + duration, TimestampFormats.RELATIVE
+                    )
+
+                if config.moderation.messages.dm_description:
+                    message += "\n\n" + config.moderation.messages.dm_description
+                else:
+                    message += "."
+
+                dm_sent = True
+                try:
+                    await user.send(message)
+                except (HTTPException, Forbidden):
+                    dm_sent = False
 
             logging_module: Optional[Logging] = self.bot.get_cog("Logging")
 
@@ -142,20 +190,32 @@ class Infract(Cog):
             await session.commit()
 
             # Send the infraction message
+            emoji_text = EMOJI_DM_SUCCESS if type_ not in HIDDEN_INFRACTIONS and dm_sent else ""
             action_text = f"Applied {INFRACTION_NAME[type_]} to {user.mention}"
             duration_text = (
-                f" until {discord_timestamp(datetime.now() + duration)}" if duration else ""
+                f" until {discord_timestamp(infraction.created_at + duration)}" if duration else ""
             )
             reason_text = f": {reason}" if reason else ""
 
             await inter.send(
-                f":hammer: {action_text}{duration_text}{reason_text} (#{infraction.id}).",
+                (
+                    f"{emoji_text}{EMOJI_APPLIED} {action_text}"
+                    f"{duration_text}{reason_text} (#{infraction.id})."
+                ),
                 ephemeral=type_ in HIDDEN_INFRACTIONS,
             )
 
             # Send a message to the log channel
-            config = await self.bot.get_config(inter)
             if config.logging.channels.moderation is not None and logging_module:
+                extras = (
+                    {
+                        "duration": f"{humanized_delta(dateutil_duration)}",
+                        "expires": format_timestamp(infraction.created_at + duration),
+                    }
+                    if duration
+                    else {}
+                )
+
                 await logging_module.send_log_message(
                     inter.guild.id,
                     config.logging.channels.moderation,
@@ -164,7 +224,7 @@ class Infract(Cog):
                     user,
                     moderator=f"{moderator.mention} (`{moderator}`, `{moderator.id}`)",
                     reason=reason,
-                    duration=humanized_delta(dateutil_duration) if duration else None,
+                    **extras,
                 )
 
     @argument_lock(3)  # user
@@ -214,6 +274,17 @@ class Infract(Cog):
                 )
                 return
 
+            # Send a DM to the user
+            if active_infraction.type not in HIDDEN_INFRACTIONS:
+                dm_sent = True
+
+                try:
+                    await user.send(
+                        f"Your {INFRACTION_NAME[type_]} in {inter.guild.name} has been cancelled."
+                    )
+                except (HTTPException, Forbidden):
+                    dm_sent = False
+
             # Cancel the infraction
             await session.execute(
                 update(InfractionModel)
@@ -223,8 +294,9 @@ class Infract(Cog):
             await session.commit()
 
             # Send the cancellation message
+            emoji_text = EMOJI_DM_SUCCESS if type_ not in HIDDEN_INFRACTIONS and dm_sent else ""
             await inter.send(
-                f":hammer: {INFRACTION_NAME[type_].capitalize()} cancelled "
+                f"{emoji_text}{EMOJI_CANCELLED} {INFRACTION_NAME[type_].capitalize()} cancelled "
                 f"for {user.mention} (#{active_infraction.id}).",
                 ephemeral=type_ in HIDDEN_INFRACTIONS,
             )

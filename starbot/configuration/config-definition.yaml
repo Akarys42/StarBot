@@ -46,6 +46,11 @@ moderation:
       type: optional:discord_permission
       default: ban_members
       description: "Moderation: Discord permission required to use the moderation commands"
+  messages:
+    dm_description:
+      type: optional:str
+      default: null
+      description: "Moderation: Embed message sent to the user. Can link to the rules or how to appeal, for example."
 
 config:
   perms:

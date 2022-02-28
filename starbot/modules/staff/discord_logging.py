@@ -68,7 +68,8 @@ PERM_EMOJIS = {
 EMPTY_PERM_OVERWRITE = PermissionOverwrite()
 
 
-def _format_timestamp(timestamp: datetime) -> str:
+def format_timestamp(timestamp: datetime) -> str:
+    """Format a timestamp for logging, with a delta and the UTC time."""
     return (
         f"{discord_timestamp(timestamp, TimestampFormats.RELATIVE)} "
         f"({timestamp.strftime(TIMESTAMP_FORMAT)})"
@@ -161,7 +162,7 @@ class Logging(Cog):
                 title="User joined",
                 color=config.colors.success,
                 user=member,
-                created=_format_timestamp(member.created_at),
+                created=format_timestamp(member.created_at),
             )
 
     @Cog.listener("on_member_remove")
@@ -176,14 +177,14 @@ class Logging(Cog):
                 title="User left",
                 color=config.colors.warning,
                 user=member,
-                created=_format_timestamp(member.created_at),
+                created=format_timestamp(member.created_at),
                 roles=", ".join(
                     f"{role.mention} (`{role}`, `{role.id}`)"
                     for role in member.roles
                     if role.id != member.guild.id  # Filter out the everyone role
                 )
                 or "None",  # If no roles, set to None
-                joined=_format_timestamp(member.joined_at),
+                joined=format_timestamp(member.joined_at),
             )
 
     @Cog.listener("on_raw_message_delete")
@@ -212,7 +213,7 @@ class Logging(Cog):
                     f"`{payload.cached_message.channel.id}`)"
                 ),
                 attachments=str(len(payload.cached_message.attachments)),
-                sent=_format_timestamp(payload.cached_message.created_at),
+                sent=format_timestamp(payload.cached_message.created_at),
                 message_id=(
                     f"[`{payload.message_id}`]"
                     f"({MESSAGE_LINK % (payload.guild_id, payload.channel_id, payload.message_id)})"
@@ -234,7 +235,7 @@ class Logging(Cog):
                 user=None,  # We don't know who deleted the message
                 description="Message content cannot be displayed",
                 channel=channel_text,
-                sent=_format_timestamp(snowflake_time(payload.message_id)),
+                sent=format_timestamp(snowflake_time(payload.message_id)),
                 message_id=(
                     f"[`{payload.message_id}`]"
                     f"({MESSAGE_LINK % (payload.guild_id, payload.channel_id, payload.message_id)})"
@@ -290,8 +291,8 @@ class Logging(Cog):
                 f"\n\n**After:**\n{truncate(payload.data['content'], MAX_EDIT_LENGTH)}"
             ),
             channel=channel_text,
-            sent=_format_timestamp(snowflake_time(payload.message_id)),
-            edited=_format_timestamp(edited_timestamp),
+            sent=format_timestamp(snowflake_time(payload.message_id)),
+            edited=format_timestamp(edited_timestamp),
             message_id=(
                 f"[`{payload.message_id}`]"
                 f"({MESSAGE_LINK % (payload.guild_id, payload.channel_id, payload.message_id)})"
@@ -332,7 +333,7 @@ class Logging(Cog):
                 title="Member passed verification",
                 color=config.colors.info,
                 user=before,
-                joined=_format_timestamp(before.joined_at),
+                joined=format_timestamp(before.joined_at),
             )
 
     @Cog.listener("on_member_update")
@@ -792,8 +793,8 @@ class Logging(Cog):
                 user=None,
                 name=event.name,
                 event_description=event.description,
-                start_time=_format_timestamp(event.scheduled_start_time),
-                end_time=_format_timestamp(event.scheduled_end_time)
+                start_time=format_timestamp(event.scheduled_start_time),
+                end_time=format_timestamp(event.scheduled_end_time)
                 if event.scheduled_end_time
                 else None,
                 channel=f"{event.channel.mention} (`{event.channel}`, `{event.channel.id}`)",
@@ -814,8 +815,8 @@ class Logging(Cog):
                 user=None,
                 name=event.name,
                 event_description=event.description,
-                start_time=_format_timestamp(event.scheduled_start_time),
-                end_time=_format_timestamp(event.scheduled_end_time)
+                start_time=format_timestamp(event.scheduled_start_time),
+                end_time=format_timestamp(event.scheduled_end_time)
                 if event.scheduled_end_time
                 else None,
                 channel=f"{event.channel.mention} (`{event.channel}`, `{event.channel.id}`)",
@@ -838,16 +839,16 @@ class Logging(Cog):
 
             if before.scheduled_start_time != after.scheduled_start_time:
                 fields["start_time"] = (
-                    f"{_format_timestamp(before.scheduled_start_time)} "
+                    f"{format_timestamp(before.scheduled_start_time)} "
                     f"{ARROW} "
-                    f"{_format_timestamp(after.scheduled_start_time)}"
+                    f"{format_timestamp(after.scheduled_start_time)}"
                 )
 
             if before.scheduled_end_time != after.scheduled_end_time:
                 fields["end_time"] = (
-                    f"{_format_timestamp(before.scheduled_end_time)} "
+                    f"{format_timestamp(before.scheduled_end_time)} "
                     f"{ARROW} "
-                    f"{_format_timestamp(after.scheduled_end_time)}"
+                    f"{format_timestamp(after.scheduled_end_time)}"
                 )
 
             if len(fields) > 0:

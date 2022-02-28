@@ -34,6 +34,9 @@ class GuildConfig(ConfigABC):
             role: Optional[int]
             discord: Optional[disnake.Permissions]
 
+        class messages(ConfigABC):
+            dm_description: Optional[optional:str]
+
     class config(ConfigABC):
 
         class perms(ConfigABC):
