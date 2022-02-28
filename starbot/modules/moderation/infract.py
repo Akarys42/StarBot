@@ -13,6 +13,7 @@ from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.converters import autocomplete_relativedelta, convert_relativedelta
 from starbot.models.infraction import InfractionModel, InfractionTypes
+from starbot.utils.lock import argument_lock
 from starbot.utils.time import discord_timestamp
 
 INFRACTIONS_WITH_DURATIONS = {InfractionTypes.MUTE}
@@ -39,6 +40,7 @@ class InfractCog(Cog):
     def __init__(self, bot: StarBot):
         self.bot = bot
 
+    @argument_lock(3)  # user
     async def infract(
         self,
         inter: ACI,
@@ -145,6 +147,7 @@ class InfractCog(Cog):
                 ephemeral=type_ in HIDDEN_INFRACTIONS,
             )
 
+    @argument_lock(3)  # user
     async def cancel_infraction(
         self, inter: ACI, user: User, moderator: User, type_: InfractionTypes
     ) -> None:
