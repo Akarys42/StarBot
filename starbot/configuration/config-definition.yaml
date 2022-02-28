@@ -1,4 +1,8 @@
 bot:
+  info_channel:
+    type: optional:discord_channel
+    default: null
+    description: "Bot: Channel where important updates will be posted."
   description:
     type: str
     default: |
@@ -10,23 +14,27 @@ logging:
     default:
       type: optional:discord_channel
       default: null
-      description: "Logging: Where all the logs will be sent, unless a specific channel is set"
+      description: "Logging: Channel where all the logs will be sent, unless a specific channel is set"
+    moderation:
+      type: optional:discord_channel
+      default: REF logging.channels.default
+      description: "Logging: Channel where moderation actions will be logged"
     messages:
       type: optional:discord_channel
       default: REF logging.channels.default
-      description: "Logging: Where to log message edits and deletions"
+      description: "Logging: Channel where to log message edits and deletions"
     members:
       type: optional:discord_channel
       default: REF logging.channels.default
-      description: "Logging: Where to log updates done to the members"
+      description: "Logging: Channel where to log updates done to the members"
     joins:
       type: optional:discord_channel
       default: REF logging.channels.default
-      description: "Logging: Where to log when members join or leave the server"
+      description: "Logging: Channel where to log when members join or leave the server"
     server:
       type: optional:discord_channel
       default: REF logging.channels.default
-      description: "Logging: Where to log when the server is updated"
+      description: "Logging: Channel where to log when the server is updated"
 
 moderation:
   perms:

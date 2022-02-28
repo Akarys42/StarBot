@@ -13,19 +13,20 @@ from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.converters import autocomplete_relativedelta, convert_relativedelta
 from starbot.models.infraction import InfractionModel, InfractionTypes
+from starbot.modules.staff.discord_logging import Logging
 from starbot.utils.lock import argument_lock
-from starbot.utils.time import discord_timestamp
+from starbot.utils.time import discord_timestamp, humanized_delta
 
 INFRACTIONS_WITH_DURATIONS = {InfractionTypes.MUTE}
 HIDDEN_INFRACTIONS = {InfractionTypes.NOTE}
 UNIQUE_INFRACTIONS = {InfractionTypes.MUTE, InfractionTypes.BAN}
 
-ACTION_MESSAGE = {
+INFRACTION_NAME = {
     InfractionTypes.NOTE: "note",
-    InfractionTypes.WARNING: "warned",
-    InfractionTypes.MUTE: "muted",
-    InfractionTypes.KICK: "kicked",
-    InfractionTypes.BAN: "banned",
+    InfractionTypes.WARNING: "warn",
+    InfractionTypes.MUTE: "mute",
+    InfractionTypes.KICK: "kick",
+    InfractionTypes.BAN: "ban",
 }
 
 # Limitation due to the Discord API
@@ -34,7 +35,7 @@ MAX_TIMEOUT_DURATION = timedelta(days=28)
 logger = logging.getLogger(__name__)
 
 
-class InfractCog(Cog):
+class Infract(Cog):
     """Module providing commands to infract users."""
 
     def __init__(self, bot: StarBot):
@@ -85,9 +86,12 @@ class InfractCog(Cog):
                     return
 
             # Convert duration to timedelta
+            dateutil_duration = duration
             if duration is not None:
                 now = arrow.utcnow()
                 duration = now + duration - now
+
+            logging_module: Optional[Logging] = self.bot.get_cog("Logging")
 
             # Apply the infraction
             try:
@@ -98,6 +102,9 @@ class InfractCog(Cog):
                         pass
                     case InfractionTypes.KICK:
                         await inter.guild.kick(user, reason=reason)
+
+                        if logging_module:
+                            logging_module.ignore_event("user_left", user.id)
                     case InfractionTypes.MUTE:
                         if duration > MAX_TIMEOUT_DURATION:
                             await inter.send(
@@ -110,6 +117,9 @@ class InfractCog(Cog):
                         await inter.guild.timeout(user, duration=duration, reason=reason)
                     case InfractionTypes.BAN:
                         await inter.guild.ban(user, reason=reason)
+
+                        if logging_module:
+                            logging_module.ignore_event("user_left", user.id)
                     case _:
                         raise ValueError(f"Unknown infraction type {type_}")
             except Forbidden:
@@ -132,20 +142,30 @@ class InfractCog(Cog):
             await session.commit()
 
             # Send the infraction message
+            action_text = f"Applied {INFRACTION_NAME[type_]} to {user.mention}"
             duration_text = (
                 f" until {discord_timestamp(datetime.now() + duration)}" if duration else ""
             )
             reason_text = f": {reason}" if reason else ""
-            action_text = (
-                f"{user.mention} has been {ACTION_MESSAGE[type_]}"
-                if type_ not in HIDDEN_INFRACTIONS
-                else f"{ACTION_MESSAGE[type_]} given to {user.mention}"
-            )
 
             await inter.send(
-                f":hammer: {action_text}" f"{duration_text}{reason_text} (#{infraction.id}).",
+                f":hammer: {action_text}{duration_text}{reason_text} (#{infraction.id}).",
                 ephemeral=type_ in HIDDEN_INFRACTIONS,
             )
+
+            # Send a message to the log channel
+            config = await self.bot.get_config(inter)
+            if config.logging.channels.moderation is not None and logging_module:
+                await logging_module.send_log_message(
+                    inter.guild.id,
+                    config.logging.channels.moderation,
+                    f"{INFRACTION_NAME[type_].capitalize()} applied",
+                    config.colors.warning,
+                    user,
+                    moderator=f"{moderator.mention} (`{moderator}`, `{moderator.id}`)",
+                    reason=reason,
+                    duration=humanized_delta(dateutil_duration) if duration else None,
+                )
 
     @argument_lock(3)  # user
     async def cancel_infraction(
@@ -172,7 +192,7 @@ class InfractCog(Cog):
 
             if active_infraction is None:
                 await inter.send(
-                    ":x: That user does not have an active infraction.",
+                    f":x: The user {user.mention} does not have an active infraction.",
                     ephemeral=True,
                 )
                 return
@@ -204,9 +224,24 @@ class InfractCog(Cog):
 
             # Send the cancellation message
             await inter.send(
-                f":hammer: Un{ACTION_MESSAGE[type_]} {user.mention} (#{active_infraction.id}).",
+                f":hammer: {INFRACTION_NAME[type_].capitalize()} cancelled "
+                f"for {user.mention} (#{active_infraction.id}).",
                 ephemeral=type_ in HIDDEN_INFRACTIONS,
             )
+
+            # Send a message to the log channel
+            config = await self.bot.get_config(inter)
+            if config.logging.channels.moderation is not None and (
+                logging_module := self.bot.get_cog("Logging")
+            ):
+                await logging_module.send_log_message(
+                    inter.guild.id,
+                    config.logging.channels.moderation,
+                    f"{INFRACTION_NAME[type_].capitalize()} cancelled",
+                    config.colors.success,
+                    user,
+                    moderator=f"{moderator.mention} (`{moderator}`, `{moderator.id}`)",
+                )
 
     @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
@@ -258,4 +293,4 @@ class InfractCog(Cog):
 
 def setup(bot: StarBot) -> None:
     """Load the infract module."""
-    bot.add_cog(InfractCog(bot))
+    bot.add_cog(Infract(bot))

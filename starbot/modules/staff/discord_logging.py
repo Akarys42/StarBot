@@ -1,4 +1,5 @@
 import logging
+from collections import deque
 from datetime import datetime
 from typing import Optional
 
@@ -85,6 +86,15 @@ class Logging(Cog):
 
     def __init__(self, bot: StarBot) -> None:
         self.bot = bot
+        self.ignored_events = deque(maxlen=15)
+
+    def ignore_event(self, event: str, user_id: Optional[int]) -> None:
+        """
+        Ignore an event with the provided key.
+
+        This will prevent the event from being logged.
+        """
+        self.ignored_events.append(f"{event}:{user_id}")
 
     async def send_log_message(
         self,
@@ -98,6 +108,9 @@ class Logging(Cog):
         **extras: str,
     ) -> None:
         """Send a message to the logging channel."""
+        if f"{title.replace(' ', '_').lower()}:{getattr(user, 'id', None)}" in self.ignored_events:
+            return
+
         # Fetch the log channel from the server
         if not (guild := self.bot.get_guild(guild_id)):
             logger.debug(f"Could not find guild {guild_id}. Dropping logging event.")

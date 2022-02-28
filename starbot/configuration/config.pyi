@@ -15,12 +15,14 @@ from starbot.configuration.config_abc import ConfigABC
 class GuildConfig(ConfigABC):
 
     class bot(ConfigABC):
+        info_channel: Optional[int]
         description: str
 
     class logging(ConfigABC):
 
         class channels(ConfigABC):
             default: Optional[int]
+            moderation: Optional[int]
             messages: Optional[int]
             members: Optional[int]
             joins: Optional[int]
