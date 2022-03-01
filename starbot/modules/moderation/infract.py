@@ -124,7 +124,7 @@ class Infract(Cog):
                     message += f" for the following reason: {reason}"
 
                 if duration:
-                    message += "\n\nThis infraction will expire " + discord_timestamp(
+                    message += "\n\nThis infraction expires " + discord_timestamp(
                         datetime.utcnow() + duration, TimestampFormats.RELATIVE
                     )
 
@@ -199,7 +199,7 @@ class Infract(Cog):
 
             await inter.send(
                 (
-                    f"{emoji_text}{EMOJI_APPLIED} {action_text}"
+                    f"{emoji_text} {EMOJI_APPLIED} {action_text}"
                     f"{duration_text}{reason_text} (#{infraction.id})."
                 ),
                 ephemeral=type_ in HIDDEN_INFRACTIONS,
@@ -296,7 +296,7 @@ class Infract(Cog):
             # Send the cancellation message
             emoji_text = EMOJI_DM_SUCCESS if type_ not in HIDDEN_INFRACTIONS and dm_sent else ""
             await inter.send(
-                f"{emoji_text}{EMOJI_CANCELLED} {INFRACTION_NAME[type_].capitalize()} cancelled "
+                f"{emoji_text} {EMOJI_CANCELLED} {INFRACTION_NAME[type_].capitalize()} cancelled "
                 f"for {user.mention} (#{active_infraction.id}).",
                 ephemeral=type_ in HIDDEN_INFRACTIONS,
             )
