@@ -4,6 +4,7 @@ from disnake.ext.commands import Cog, slash_command
 from sqlalchemy import select
 
 from starbot.bot import StarBot
+from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.models.infraction import InfractionModel, InfractionTypes
 from starbot.modules.moderation.infract import INFRACTION_NAME
@@ -56,6 +57,7 @@ class Infractions(Cog):
             f"{cancelled_text}"
         )
 
+    @require_permission(role_id="moderation.perms.role", permissions="moderation.perms.discord")
     @slash_command()
     async def infraction(self, inter: ACI) -> None:
         """Group of commands used to manage infractions."""
