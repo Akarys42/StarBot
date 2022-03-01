@@ -34,6 +34,16 @@ Timestamp = Union[
     tuple[int, int, int],  # ISO calendar tuple
 ]
 
+TIMESTAMP_FORMAT = "%d-%m-%Y %H:%M:%S"
+
+
+def format_timestamp(timestamp: datetime) -> str:
+    """Format a timestamp for logging, with a delta and the UTC time."""
+    return (
+        f"{discord_timestamp(timestamp, TimestampFormats.RELATIVE)} "
+        f"({timestamp.strftime(TIMESTAMP_FORMAT)})"
+    )
+
 
 class TimestampFormats(Enum):
     """

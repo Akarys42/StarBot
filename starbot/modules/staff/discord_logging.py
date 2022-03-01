@@ -27,11 +27,10 @@ from disnake.utils import snowflake_time
 
 from starbot.bot import StarBot
 from starbot.utils.text import truncate
-from starbot.utils.time import TimestampFormats, discord_timestamp
+from starbot.utils.time import format_timestamp
 
 logger = logging.getLogger(__name__)
 
-TIMESTAMP_FORMAT = "%d-%m-%Y %H:%M:%S"
 GUILD_FIELDS = (
     "afk_channel",
     "afk_timeout",
@@ -66,14 +65,6 @@ PERM_EMOJIS = {
 }
 
 EMPTY_PERM_OVERWRITE = PermissionOverwrite()
-
-
-def format_timestamp(timestamp: datetime) -> str:
-    """Format a timestamp for logging, with a delta and the UTC time."""
-    return (
-        f"{discord_timestamp(timestamp, TimestampFormats.RELATIVE)} "
-        f"({timestamp.strftime(TIMESTAMP_FORMAT)})"
-    )
 
 
 def _get_human_readable_channel_type(channel: GuildChannel) -> Optional[str]:

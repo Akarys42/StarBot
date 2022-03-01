@@ -172,7 +172,8 @@ class Infract(Cog):
                         raise ValueError(f"Unknown infraction type {type_}")
             except Forbidden:
                 await inter.send(
-                    "The bot doesn't have the permission to apply this infraction.", ephemeral=True
+                    ":x: The bot doesn't have the permission to apply this infraction.",
+                    ephemeral=True,
                 )
                 return
 
@@ -185,6 +186,7 @@ class Infract(Cog):
                 reason=reason,
                 duration=duration,
                 created_at=inter.created_at.replace(tzinfo=None),
+                dm_sent=dm_sent,
             )
             session.add(infraction)
             await session.commit()
@@ -269,7 +271,7 @@ class Infract(Cog):
                         raise ValueError(f"Infraction type {type_} cannot be cancelled")
             except Forbidden:
                 await inter.send(
-                    "The bot doesn't have the permission to cancel this infraction.",
+                    ":x: The bot doesn't have the permission to cancel this infraction.",
                     ephemeral=True,
                 )
                 return
