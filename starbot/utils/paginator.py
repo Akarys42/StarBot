@@ -84,7 +84,7 @@ class PaginatorView(View):
                 raise TypeError(
                     "PaginatorView generator must be a list, async iterator, or iterator."
                 )
-        except (StopIteration, IndexError):
+        except (StopIteration, StopAsyncIteration, IndexError):
             return False
 
         return True
