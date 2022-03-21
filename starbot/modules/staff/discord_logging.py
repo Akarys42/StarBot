@@ -266,7 +266,9 @@ class Logging(Cog):
         else:
             before = "Cannot display previous content"
 
-        if "edited_timestamp" not in payload.data:
+        if "edited_timestamp" not in payload.data or not isinstance(
+            payload.data["edited_timestamp"], str
+        ):
             return
 
         edited_timestamp = datetime.fromisoformat(payload.data["edited_timestamp"])
