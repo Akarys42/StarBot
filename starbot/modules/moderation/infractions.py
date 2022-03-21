@@ -9,7 +9,7 @@ from starbot.bot import StarBot
 from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.models.infraction import InfractionModel, InfractionTypes
-from starbot.modules.moderation.constants import INFRACTION_NAME
+from starbot.modules.moderation._constants import INFRACTION_NAME
 from starbot.utils.time import format_timestamp, humanized_delta
 
 CANCELLABLE_INFRACTIONS = {InfractionTypes.MUTE, InfractionTypes.BAN}

@@ -14,7 +14,7 @@ from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.converters import autocomplete_relativedelta, convert_relativedelta
 from starbot.models.infraction import InfractionModel, InfractionTypes
-from starbot.modules.moderation.constants import (
+from starbot.modules.moderation._constants import (
     HIDDEN_INFRACTIONS,
     INFRACTION_NAME,
     INFRACTIONS_WITH_DURATIONS,
