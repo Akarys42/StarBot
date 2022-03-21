@@ -24,6 +24,12 @@ services:
     environment:
       - DATABASE_URL=postgresql+asyncpg://starbot:starbot@postgres:5432/starbot
       - RUN_MIGRATIONS=1
+    deploy:
+      resources:
+        limits:
+          # Make sure we don't cause a system OOM
+          # It never happened to me dunno what you are talking about
+          memory: "2048M"
 
 volumes:
   starbot_data:

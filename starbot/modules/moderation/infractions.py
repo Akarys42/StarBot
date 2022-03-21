@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import AsyncIterator, Literal, Optional
 
 from dateutil.relativedelta import relativedelta
 from disnake import Embed, User
@@ -10,6 +10,7 @@ from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.models.infraction import InfractionModel, InfractionTypes
 from starbot.modules.moderation._constants import INFRACTION_NAME
+from starbot.utils.paginator import PaginatorView
 from starbot.utils.time import format_timestamp, humanized_delta
 
 CANCELLABLE_INFRACTIONS = {InfractionTypes.MUTE, InfractionTypes.BAN}
@@ -19,6 +20,8 @@ GREEN_CIRCLE = "\N{LARGE GREEN CIRCLE}"
 YELLOW_CIRCLE = "\N{LARGE YELLOW CIRCLE}"
 
 INFRACTION_LITERAL = Literal["note", "warn", "mute", "kick", "ban", "all"]
+
+PAGINATOR_LENGTH = 1200  # Maximum length of a single page of infractions
 
 
 class Infractions(Cog):
@@ -40,7 +43,7 @@ class Infractions(Cog):
         else:
             emoji = YELLOW_CIRCLE
 
-        id_text = f" (`{infr.id}`)" if include_id else ""
+        id_text = f" (`#{infr.id}`)" if include_id else ""
 
         if infr.duration:
             delta = humanized_delta(relativedelta(infr.created_at + infr.duration, infr.created_at))
@@ -124,24 +127,32 @@ class Infractions(Cog):
             predicates.append(InfractionModel.type == InfractionTypes[type.upper()])
 
         async with self.bot.Session() as session:
-            query = await session.execute(select(InfractionModel).where(and_(*predicates)))
-
-            infractions = query.fetchall()
-
-        if not infractions:
-            await inter.send(":x: No infractions found.", ephemeral=True)
-            return
-
-        description = "\n\n".join(self.format_infraction(infr[0]) for infr in infractions)
-        config = await self.bot.get_config(inter)
-
-        await inter.send(
-            embed=Embed(
-                title="Search results",
-                description=description,
-                color=config.colors.info,
+            query = await session.stream(
+                select(InfractionModel).where(and_(*predicates)).order_by(InfractionModel.id)
             )
-        )
+
+            # Check if there is at least one infraction
+            try:
+                first_infraction = await query.__anext__()
+            except StopAsyncIteration:
+                await inter.send(":x: No infractions found.", ephemeral=True)
+                return
+
+            async def _infraction_stream() -> AsyncIterator[str]:
+                yield self.format_infraction(first_infraction[0])
+                async for infraction in query:
+                    yield self.format_infraction(infraction[0])
+
+            config = await self.bot.get_config(inter)
+
+            paginator = PaginatorView(
+                inter=inter,
+                gen=_infraction_stream(),
+                title="Search results",
+                color=config.colors.info,
+                max_len=PAGINATOR_LENGTH,
+            )
+            await paginator.start()
 
 
 def setup(bot: StarBot) -> None:
