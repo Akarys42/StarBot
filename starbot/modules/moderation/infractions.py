@@ -1,13 +1,15 @@
+from typing import Literal, Optional
+
 from dateutil.relativedelta import relativedelta
-from disnake import Embed
+from disnake import Embed, User
 from disnake.ext.commands import Cog, slash_command
-from sqlalchemy import select
+from sqlalchemy import and_, select
 
 from starbot.bot import StarBot
 from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.models.infraction import InfractionModel, InfractionTypes
-from starbot.modules.moderation.infract import INFRACTION_NAME
+from starbot.modules.moderation.constants import INFRACTION_NAME
 from starbot.utils.time import format_timestamp, humanized_delta
 
 CANCELLABLE_INFRACTIONS = {InfractionTypes.MUTE, InfractionTypes.BAN}
@@ -15,6 +17,8 @@ CANCELLABLE_INFRACTIONS = {InfractionTypes.MUTE, InfractionTypes.BAN}
 RED_CIRCLE = "\N{LARGE RED CIRCLE}"
 GREEN_CIRCLE = "\N{LARGE GREEN CIRCLE}"
 YELLOW_CIRCLE = "\N{LARGE YELLOW CIRCLE}"
+
+INFRACTION_LITERAL = Literal["note", "warn", "mute", "kick", "ban", "all"]
 
 
 class Infractions(Cog):
@@ -94,6 +98,50 @@ class Infractions(Cog):
                     color=config.colors.info,
                 )
             )
+
+    @infraction.sub_command()
+    async def search(
+        self,
+        inter: ACI,
+        user: Optional[User] = None,
+        reason: Optional[str] = None,
+        type: INFRACTION_LITERAL = "all",
+    ) -> None:
+        """Search for infractions by user, type, or reason."""
+        if user is None and reason is None:
+            await inter.send(":x: You must specify either a user or a reason.", ephemeral=True)
+            return
+
+        await inter.response.defer()
+
+        predicates = [InfractionModel.guild_id == inter.guild.id]
+
+        if user:
+            predicates.append(InfractionModel.user_id == user.id)
+        if reason:
+            predicates.append(InfractionModel.reason.contains(reason))
+        if type != "all":
+            predicates.append(InfractionModel.type == InfractionTypes[type.upper()])
+
+        async with self.bot.Session() as session:
+            query = await session.execute(select(InfractionModel).where(and_(*predicates)))
+
+            infractions = query.fetchall()
+
+        if not infractions:
+            await inter.send(":x: No infractions found.", ephemeral=True)
+            return
+
+        description = "\n\n".join(self.format_infraction(infr[0]) for infr in infractions)
+        config = await self.bot.get_config(inter)
+
+        await inter.send(
+            embed=Embed(
+                title="Search results",
+                description=description,
+                color=config.colors.info,
+            )
+        )
 
 
 def setup(bot: StarBot) -> None:
