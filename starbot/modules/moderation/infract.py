@@ -14,21 +14,15 @@ from starbot.checks import require_permission
 from starbot.constants import ACI
 from starbot.converters import autocomplete_relativedelta, convert_relativedelta
 from starbot.models.infraction import InfractionModel, InfractionTypes
+from starbot.modules.moderation._constants import (
+    HIDDEN_INFRACTIONS,
+    INFRACTION_NAME,
+    INFRACTIONS_WITH_DURATIONS,
+    UNIQUE_INFRACTIONS,
+)
 from starbot.modules.staff.discord_logging import Logging, format_timestamp
 from starbot.utils.lock import argument_lock
 from starbot.utils.time import TimestampFormats, discord_timestamp, humanized_delta
-
-INFRACTIONS_WITH_DURATIONS = {InfractionTypes.MUTE}
-HIDDEN_INFRACTIONS = {InfractionTypes.NOTE}
-UNIQUE_INFRACTIONS = {InfractionTypes.MUTE, InfractionTypes.BAN}
-
-INFRACTION_NAME = {
-    InfractionTypes.NOTE: "note",
-    InfractionTypes.WARNING: "warn",
-    InfractionTypes.MUTE: "mute",
-    InfractionTypes.KICK: "kick",
-    InfractionTypes.BAN: "ban",
-}
 
 EMOJI_APPLIED = "\N{HAMMER}"
 EMOJI_CANCELLED = "\N{HAMMER AND WRENCH}"
