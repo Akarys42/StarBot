@@ -48,9 +48,8 @@ class Configuration(Cog):
 
     @bypass_guild_configured_check
     @slash_command()
-    async def config(self, ctx: ACI) -> None:
+    async def config(self, inter: ACI) -> None:
         """Configure the bot for your guild."""
-        pass
 
     @require_permission(role_id="config.perms.role", permissions="config.perms.discord")
     @config.sub_command()
