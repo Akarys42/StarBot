@@ -5,7 +5,7 @@ from typing import Optional
 
 import arrow
 from dateutil.relativedelta import relativedelta
-from disnake import Forbidden, User
+from disnake import Forbidden, Member, User
 from disnake.ext.commands import Cog, slash_command
 from sqlalchemy import and_, select, update
 
@@ -17,6 +17,7 @@ from starbot.models.infraction import InfractionModel, InfractionTypes
 from starbot.modules.moderation._constants import (
     HIDDEN_INFRACTIONS,
     INFRACTION_NAME,
+    INFRACTION_REQUIRING_RANK,
     INFRACTIONS_WITH_DURATIONS,
     UNIQUE_INFRACTIONS,
 )
@@ -104,6 +105,16 @@ class Infract(Cog):
                         can_continue = inter.guild.me.guild_permissions.kick_members
                     case InfractionTypes.BAN:
                         can_continue = inter.guild.me.guild_permissions.ban_members
+
+                if type_ in INFRACTION_REQUIRING_RANK:
+                    if (
+                        isinstance(user, Member)
+                        and inter.guild.me.top_role.position < user.top_role.position
+                    ):
+                        can_continue = False
+
+                    if inter.guild.owner_id == user.id:
+                        can_continue = False
 
                 if not can_continue:
                     await inter.send(
