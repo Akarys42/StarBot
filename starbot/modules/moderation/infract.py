@@ -20,7 +20,7 @@ from starbot.modules.moderation._constants import (
     INFRACTIONS_WITH_DURATIONS,
     UNIQUE_INFRACTIONS,
 )
-from starbot.modules.staff.discord_logging import Logging, format_timestamp
+from starbot.modules.moderation.discord_logging import Logging, format_timestamp
 from starbot.utils.lock import argument_lock
 from starbot.utils.time import TimestampFormats, discord_timestamp, humanized_delta
 
