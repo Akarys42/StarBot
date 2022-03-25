@@ -148,11 +148,12 @@ class RolePicker(Cog):
 
                 await inter.send(
                     (
-                        "Failed to create view. "
+                        "Failed to create picker. "
                         "Does the bot have the permission to post in this channel?"
                     ),
                     ephemeral=True,
                 )
+                return
 
             # Set message ID now that we have it
             role_picker.message_id = message.id
@@ -164,7 +165,7 @@ class RolePicker(Cog):
         )
 
     @role_picker.sub_command()
-    async def add(self, inter: ACI, picker: int, role: Role, message: Optional[str] = None) -> None:
+    async def add(self, inter: ACI, picker: str, role: Role, message: Optional[str] = None) -> None:
         """Add a role to a role picker."""
         if not message:
             message = role.name
@@ -174,7 +175,7 @@ class RolePicker(Cog):
                 await session.execute(
                     select(RolePickerModel)
                     .options(selectinload(RolePickerModel.role_picker_entries))
-                    .where(RolePickerModel.id == picker)
+                    .where(RolePickerModel.id == int(picker))
                 )
             ).first()
 
@@ -187,7 +188,7 @@ class RolePicker(Cog):
                 return
 
             role_picker_entry = RolePickerEntryModel(
-                picker_id=picker, role_id=role.id, message=message
+                picker_id=int(picker), role_id=role.id, message=message
             )
             session.add(role_picker_entry)
             await session.commit()
@@ -203,14 +204,14 @@ class RolePicker(Cog):
         await inter.send(":white_check_mark: Role added!" + warnings)
 
     @role_picker.sub_command()
-    async def remove(self, inter: ACI, picker: int, role: Role) -> None:
+    async def remove(self, inter: ACI, picker: str, role: Role) -> None:
         """Remove a role from a role picker."""
         async with self.bot.Session() as session:
             picker_ = (
                 await session.execute(
                     select(RolePickerModel)
                     .options(selectinload(RolePickerModel.role_picker_entries))
-                    .where(RolePickerModel.id == picker)
+                    .where(RolePickerModel.id == int(picker))
                 )
             ).first()
 
@@ -228,14 +229,14 @@ class RolePicker(Cog):
         await inter.send(":x: Role not in picker.", ephemeral=True)
 
     @role_picker.sub_command()
-    async def delete(self, inter: ACI, picker: int) -> None:
+    async def delete(self, inter: ACI, picker: str) -> None:
         """Permanently delete a role picker."""
         async with self.bot.Session() as session:
             picker_ = (
                 await session.execute(
                     select(RolePickerModel)
                     .options(selectinload(RolePickerModel.role_picker_entries))
-                    .where(RolePickerModel.id == picker)
+                    .where(RolePickerModel.id == int(picker))
                 )
             ).first()
 
@@ -263,7 +264,7 @@ class RolePicker(Cog):
         await inter.send(":white_check_mark: Role picker deleted." + warnings)
 
     @multi_autocomplete((add, "picker"), (remove, "picker"), (delete, "picker"))
-    async def autocomplete_picker_id(self, inter: ACI, prefix: str) -> list:
+    async def autocomplete_picker_id(self, inter: ACI, prefix: str) -> dict[str, str]:
         """Autocomplete role picker ID."""
         suggestions = {}
 
@@ -277,7 +278,7 @@ class RolePicker(Cog):
                     break
 
                 if prefix in picker[0].title:
-                    suggestions[picker[0].title] = picker[0].id
+                    suggestions[picker[0].title] = str(picker[0].id)
 
         return suggestions
 
