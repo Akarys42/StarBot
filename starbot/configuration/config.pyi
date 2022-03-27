@@ -37,6 +37,9 @@ class GuildConfig(ConfigABC):
         class messages(ConfigABC):
             dm_description: Optional[optional:str]
 
+    class utilities(ConfigABC):
+        auto_role: Optional[int]
+
     class config(ConfigABC):
 
         class perms(ConfigABC):

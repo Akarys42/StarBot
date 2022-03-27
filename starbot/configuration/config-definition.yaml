@@ -52,6 +52,12 @@ moderation:
       default: null
       description: "Moderation: Embed message sent to the user. Can link to the rules or how to appeal, for example."
 
+utilities:
+  auto_role:
+    type: optional:discord_role
+    default: null
+    description: "Utilities: Role given to members when they join the server"
+
 config:
   perms:
     role:
