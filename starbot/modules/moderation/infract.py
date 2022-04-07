@@ -93,6 +93,8 @@ class Infract(Cog):
                 now = arrow.utcnow()
                 duration = now + duration - now
 
+            dm_sent = None
+
             if type_ not in HIDDEN_INFRACTIONS:
                 # We try to check early if the bot should be able to apply the infraction or not
                 # so we don't send a DM if it can't be applied
@@ -280,6 +282,8 @@ class Infract(Cog):
                     ephemeral=True,
                 )
                 return
+
+            dm_sent = None
 
             # Send a DM to the user
             if active_infraction.type not in HIDDEN_INFRACTIONS:
