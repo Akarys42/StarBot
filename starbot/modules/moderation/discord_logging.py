@@ -438,7 +438,7 @@ class Logging(Cog):
 
         The following fields are checked:
         - name
-        - topic
+        - topic (if TextChannel)
         - position
         - nsfw
         - category
@@ -454,10 +454,11 @@ class Logging(Cog):
                 return
 
             fields = {}
-            field_names = ["name", "topic", "position", "nsfw", "category"]
+            field_names = ["name", "position", "nsfw", "category"]
 
             if isinstance(before, TextChannel):
                 field_names.append("slowmode_delay")
+                field_names.append("topic")
 
             for field_name in field_names:
                 if getattr(before, field_name) != getattr(after, field_name):
