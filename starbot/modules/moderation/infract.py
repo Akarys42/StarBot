@@ -52,6 +52,8 @@ class Infract(Cog):
         duration: Optional[relativedelta] = None,
     ) -> None:
         """Infract a user."""
+        await inter.response.defer(ephemeral=type_ in HIDDEN_INFRACTIONS)
+
         config = await self.bot.get_config(inter)
 
         async with self.bot.Session() as session:
