@@ -26,6 +26,7 @@ from disnake.ext.commands import Cog
 from disnake.utils import snowflake_time
 
 from starbot.bot import StarBot
+from starbot.utils.pluralkit import is_deleted_by_pluralkit
 from starbot.utils.text import truncate
 from starbot.utils.time import format_timestamp
 
@@ -191,6 +192,13 @@ class Logging(Cog):
 
         # The message was cached
         if payload.cached_message:
+            if await is_deleted_by_pluralkit(self.bot, payload.message_id):
+                logging.debug(
+                    f"Ignoring message {payload.message_id} because "
+                    f"it has been proxied by pluralkit"
+                )
+                return
+
             await self.send_log_message(
                 guild_id=payload.guild_id,
                 channel_id=config.logging.channels.messages,
