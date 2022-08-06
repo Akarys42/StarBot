@@ -3,11 +3,11 @@ from io import StringIO
 import yaml
 from aiohttp import ClientError
 from disnake import File, Permissions, TextChannel, Thread
-from disnake.ext.commands import Cog, slash_command
+from disnake.ext.commands import Cog, has_permissions, slash_command
 from sqlalchemy import and_, delete, select
 
 from starbot.bot import StarBot
-from starbot.checks import is_guild_owner, require_permission
+from starbot.checks import require_permission
 from starbot.configuration.definition import DEFINITION
 from starbot.configuration.utils import config_to_tree, get_dotted_path
 from starbot.constants import ACI
@@ -322,7 +322,7 @@ class Configuration(Cog):
         return {key: value for key, value in self.autocomplete_fields.items() if prefix in key}
 
     @bypass_guild_configured_check
-    @is_guild_owner()
+    @has_permissions(administrator=True)
     @config.sub_command()
     async def setup(self, inter: ACI) -> None:
         """Bootstrap the bot."""
