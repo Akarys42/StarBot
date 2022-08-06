@@ -1,6 +1,5 @@
 import logging
 
-from disnake import Embed
 from disnake.ext.commands import Cog, CommandError, errors
 
 from starbot.bot import StarBot
@@ -18,16 +17,18 @@ class ErrorHandler(Cog):
         self.bot = bot
 
     async def error_embed(self, inter: ACI, message: str, ephemeral: bool = False) -> None:
-        """Creates an error embed and send it to ctx_or_inter."""
-        try:
-            config = await self.bot.get_config(inter)
-            color = config.colors.danger
-        except GuildNotConfiguredError:
-            color = 0xED4245
+        """Creates an error message and send it to ctx_or_inter."""
+        await inter.send(f":x: {message}", ephemeral=ephemeral)
 
-        await inter.send(
-            embed=Embed(title="Error", description=message, color=color), ephemeral=ephemeral
-        )
+        # Future proofing: we'll want to send some error details if we can
+        # try:
+        #     config = await self.bot.get_config(inter)
+        #     color = config.colors.danger
+        # except GuildNotConfiguredError:
+        #     color = 0xED4245
+        # await inter.send(
+        #     embed=Embed(title="Error", description=message, color=color), ephemeral=ephemeral
+        # )
 
     @Cog.listener()
     async def on_slash_command_error(self, inter: ACI, error: CommandError) -> None:
