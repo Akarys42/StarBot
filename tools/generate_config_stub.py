@@ -8,7 +8,12 @@ from typing import Optional
 
 import yaml
 
-from starbot.configuration.definition import SPECIAL_TYPES
+SPECIAL_TYPES = {
+    "discord_role": "int",
+    "discord_permission": "disnake.Permissions",
+    "discord_channel": "int",
+    "choice": "str",
+}
 
 HELP_TEXT = """
 This script generates the typing stub for the config module.
